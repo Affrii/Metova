@@ -941,4 +941,4 @@ function Onboarding({ onComplete }) {
   )
 }
 
-export default onboarding
+export default Onboarding
