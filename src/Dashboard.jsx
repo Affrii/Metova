@@ -75,19 +75,11 @@ function Dashboard({ userData }) {
     },
   ]
 
-  // Ring calculations
-  const size = 220
+  const size = 200
   const strokeWidth = 12
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
-
-  // Outer black countdown arc — sits just outside the inner ring
-  const outerRadius = (size / 2) + 10
-  const outerCircumference = 2 * Math.PI * outerRadius
-  const daysRemaining = Math.max(daysUntilPeriod || 0, 0)
-  const outerProgress = daysRemaining / 28
-  const outerDashoffset = outerCircumference - (outerProgress * outerCircumference)
 
   const handlePeriodSave = () => {
     if (!periodFlow) return
@@ -133,14 +125,10 @@ function Dashboard({ userData }) {
       <div className="fade-up-2" style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "32px 0 24px" }}>
         <div style={{ position: "relative", width: size, height: size }}>
           <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-            
-            {/* Base track */}
             <circle
               cx={size / 2} cy={size / 2} r={radius}
               fill="none" stroke="#E8E4F0" strokeWidth={strokeWidth}
             />
-
-            {/* Phase color arc — days passed */}
             <circle
               cx={size / 2} cy={size / 2} r={radius}
               fill="none" stroke={phaseColor} strokeWidth={strokeWidth}
@@ -149,20 +137,8 @@ function Dashboard({ userData }) {
               strokeLinecap="round"
               style={{ transition: "stroke-dashoffset 0.6s ease" }}
             />
-
-            {/* Outer black countdown arc — days remaining */}
-            <circle
-              cx={size / 2} cy={size / 2} r={outerRadius}
-              fill="none" stroke="#0D0D0D" strokeWidth={12}
-              strokeDasharray={outerCircumference}
-              strokeDashoffset={outerDashoffset}
-              strokeLinecap="round"
-              style={{ transition: "stroke-dashoffset 0.6s ease" }}
-            />
-
           </svg>
 
-          {/* Center text */}
           <div style={{
             position: "absolute", top: "50%", left: "50%",
             transform: "translate(-50%, -50%)", textAlign: "center",
@@ -200,16 +176,10 @@ function Dashboard({ userData }) {
               key={log.key}
               onClick={() => setActiveSheet(log.key)}
               style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "6px",
-                cursor: "pointer",
-                backgroundColor: "#FDF0EC",
-                border: "0.5px solid #E8E4F0",
-                borderRadius: "16px",
-                padding: "16px 12px",
+                flex: 1, display: "flex", flexDirection: "column",
+                alignItems: "center", gap: "6px", cursor: "pointer",
+                backgroundColor: "#FDF0EC", border: "0.5px solid #E8E4F0",
+                borderRadius: "16px", padding: "16px 12px",
               }}
             >
               <div style={{ fontSize: "24px" }}>{log.emoji}</div>
