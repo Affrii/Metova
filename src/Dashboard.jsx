@@ -83,7 +83,7 @@ function Dashboard({ userData }) {
   const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
 
   // Outer black countdown arc — sits just outside the inner ring
-  const outerRadius = (size / 2) - 1
+  const outerRadius = (size / 2) + 10
   const outerCircumference = 2 * Math.PI * outerRadius
   const daysRemaining = Math.max(daysUntilPeriod || 0, 0)
   const outerProgress = daysRemaining / 28
@@ -153,7 +153,7 @@ function Dashboard({ userData }) {
             {/* Outer black countdown arc — days remaining */}
             <circle
               cx={size / 2} cy={size / 2} r={outerRadius}
-              fill="none" stroke="#0D0D0D" strokeWidth={2}
+              fill="none" stroke="#0D0D0D" strokeWidth={12}
               strokeDasharray={outerCircumference}
               strokeDashoffset={outerDashoffset}
               strokeLinecap="round"
