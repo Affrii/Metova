@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import Onboarding from "./Onboarding"
 import Dashboard from "./Dashboard"
-import CycleTracker from "./CycleTracker"
+import CycleTracker from "./Cycletracker"
 import SymptomTracker from "./SymptomTracker"
 import AIChat from "./AIChat"
 import Insights from "./Insights"
@@ -85,9 +85,9 @@ function App() {
           height_cm: data.heightCm ? parseFloat(data.heightCm) : null,
           weight_kg: data.weightKg ? parseFloat(data.weightKg) : null,
           city: data.city || null,
-          pcos_diagnosis_status: data.pcosStatus || null,
-          diet_type: data.dietType || null,
-          activity_level: data.activityLevel || null,
+          pcos_diagnosis_status: data.pcosStatus?.toLowerCase() || null,
+          diet_type: data.dietType?.toLowerCase() || null,
+          activity_level: data.activityLevel?.toLowerCase() || null,
           existing_conditions: data.existingConditions || [],
           family_history: data.familyHistory || [],
           past_surgeries: data.pastSurgeries || [],
