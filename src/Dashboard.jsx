@@ -4,26 +4,22 @@ function Dashboard({ userData }) {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeSheet, setActiveSheet] = useState(null)
   
-  // Period log state
   const [periodFlow, setPeriodFlow] = useState(null)
   const [periodPain, setPeriodPain] = useState(0)
   const [periodSaved, setPeriodSaved] = useState(false)
 
-  // Food log state
   const [foodText, setFoodText] = useState("")
   const [mealType, setMealType] = useState(null)
   const [foodSaved, setFoodSaved] = useState(false)
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 60000)
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
 
   const calculateCycleInfo = () => {
     if (!userData?.lastPeriod) {
-      return { cycleDay: null, phase: "unknown", daysUntilPeriod: null, phaseColor: "#E8E4F0" }
+      return { cycleDay: null, phase: "unknown", daysUntilPeriod: null, phaseColor: "#E8E4F0", progress: 0 }
     }
     const lastPeriod = new Date(userData.lastPeriod)
     const today = new Date()
@@ -79,21 +75,19 @@ function Dashboard({ userData }) {
     },
   ]
 
+  // Ring calculations
   const size = 220
-const strokeWidth = 12
-const radius = (size - strokeWidth) / 2
-const circumference = 2 * Math.PI * radius
-const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
+  const strokeWidth = 12
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
 
-// Outer black countdown arc
-const outerSize = 220
-const outerStrokeWidth = 3
-const outerRadius = (outerSize / 2) - outerStrokeWidth
-const outerCircumference = 2 * Math.PI * outerRadius
-const daysRemaining = daysUntilPeriod || 0
-const totalDays = 28
-const outerProgress = daysRemaining / totalDays
-const outerDashoffset = outerCircumference - (outerProgress * outerCircumference)
+  // Outer black countdown arc — sits just outside the inner ring
+  const outerRadius = (size / 2) - 1
+  const outerCircumference = 2 * Math.PI * outerRadius
+  const daysRemaining = Math.max(daysUntilPeriod || 0, 0)
+  const outerProgress = daysRemaining / 28
+  const outerDashoffset = outerCircumference - (outerProgress * outerCircumference)
 
   const handlePeriodSave = () => {
     if (!periodFlow) return
@@ -126,17 +120,8 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
     }}>
 
       {/* Top bar */}
-      <div className="fade-up-1" style={{
-        padding: "52px 24px 0",
-        maxWidth: "480px",
-        margin: "0 auto",
-      }}>
-        <div style={{
-          fontSize: "26px",
-          fontFamily: "Cormorant Garamond, serif",
-          fontWeight: "500",
-          color: "#0D0D0D",
-        }}>
+      <div className="fade-up-1" style={{ padding: "52px 24px 0", maxWidth: "480px", margin: "0 auto" }}>
+        <div style={{ fontSize: "26px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D" }}>
           Hello, {userData?.fullName?.split(" ")[0] || "there"}
         </div>
         <div style={{ fontSize: "13px", color: "#6B6560", marginTop: "4px" }}>
@@ -145,37 +130,39 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
       </div>
 
       {/* Cycle ring */}
-      <div className="fade-up-2" style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        margin: "32px 0 24px",
-      }}>
+      <div className="fade-up-2" style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "32px 0 24px" }}>
         <div style={{ position: "relative", width: size, height: size }}>
           <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-  {/* Base track */}
-  <circle
-    cx={size / 2} cy={size / 2} r={radius}
-    fill="none" stroke="#E8E4F0" strokeWidth={strokeWidth}
-  />
-  {/* Phase color arc */}
-  <circle
-    cx={size / 2} cy={size / 2} r={radius}
-    fill="none" stroke={phaseColor} strokeWidth={strokeWidth}
-    strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-    strokeLinecap="round"
-    style={{ transition: "stroke-dashoffset 0.6s ease" }}
-  />
-  {/* Outer black countdown arc */}
-  <circle
-    cx={outerSize / 2} cy={outerSize / 2} r={outerRadius}
-    fill="none" stroke="#0D0D0D" strokeWidth={outerStrokeWidth}
-    strokeDasharray={outerCircumference}
-    strokeDashoffset={outerDashoffset}
-    strokeLinecap="round"
-    style={{ transition: "stroke-dashoffset 0.6s ease" }}
-  />
-</svg>
+            
+            {/* Base track */}
+            <circle
+              cx={size / 2} cy={size / 2} r={radius}
+              fill="none" stroke="#E8E4F0" strokeWidth={strokeWidth}
+            />
+
+            {/* Phase color arc — days passed */}
+            <circle
+              cx={size / 2} cy={size / 2} r={radius}
+              fill="none" stroke={phaseColor} strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              style={{ transition: "stroke-dashoffset 0.6s ease" }}
+            />
+
+            {/* Outer black countdown arc — days remaining */}
+            <circle
+              cx={size / 2} cy={size / 2} r={outerRadius}
+              fill="none" stroke="#0D0D0D" strokeWidth={2}
+              strokeDasharray={outerCircumference}
+              strokeDashoffset={outerDashoffset}
+              strokeLinecap="round"
+              style={{ transition: "stroke-dashoffset 0.6s ease" }}
+            />
+
+          </svg>
+
+          {/* Center text */}
           <div style={{
             position: "absolute", top: "50%", left: "50%",
             transform: "translate(-50%, -50%)", textAlign: "center",
@@ -202,12 +189,8 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
         )}
       </div>
 
-      {/* Quick log buttons — Period + Food only */}
-      <div className="fade-up-3" style={{
-        padding: "0 24px",
-        maxWidth: "480px",
-        margin: "0 auto 28px",
-      }}>
+      {/* Quick log buttons */}
+      <div className="fade-up-3" style={{ padding: "0 24px", maxWidth: "480px", margin: "0 auto 28px" }}>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
           {[
             { label: "Log Period", emoji: "🩸", key: "period" },
@@ -236,13 +219,14 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
         </div>
       </div>
 
-      {/* Today's insights */}
+      {/* Today's insights label */}
       <div className="fade-up-4" style={{ padding: "0 24px", maxWidth: "480px", margin: "0 auto" }}>
         <div style={{ fontSize: "11px", color: "#6B6560", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
           Today's insights
         </div>
       </div>
 
+      {/* Insight cards */}
       {insightCards.map((card, i) => (
         <div key={i} className={`fade-up-${i + 5}`} style={{ padding: "0 24px", maxWidth: "480px", margin: "0 auto" }}>
           <div style={{
@@ -282,49 +266,29 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
 
       {/* PERIOD LOG BOTTOM SHEET */}
       {activeSheet === "period" && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 100,
-          backgroundColor: "rgba(0,0,0,0.3)",
-          display: "flex", alignItems: "flex-end",
-        }}
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end" }}
           onClick={() => setActiveSheet(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             className="fade-up-1"
-            style={{
-              width: "100%",
-              backgroundColor: "#FAF7F2",
-              borderRadius: "24px 24px 0 0",
-              padding: "28px 24px 48px",
-              maxWidth: "480px",
-              margin: "0 auto",
-            }}
+            style={{ width: "100%", backgroundColor: "#FAF7F2", borderRadius: "24px 24px 0 0", padding: "28px 24px 48px", maxWidth: "480px", margin: "0 auto" }}
           >
             <div style={{ width: "36px", height: "4px", backgroundColor: "#E8E4F0", borderRadius: "2px", margin: "0 auto 24px" }} />
-            
-            <div style={{ fontSize: "20px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "4px" }}>
-              Log your period
-            </div>
-            <div style={{ fontSize: "13px", color: "#6B6560", marginBottom: "24px" }}>
-              How is your flow today?
-            </div>
+            <div style={{ fontSize: "20px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "4px" }}>Log your period</div>
+            <div style={{ fontSize: "13px", color: "#6B6560", marginBottom: "24px" }}>How is your flow today?</div>
 
-            {/* Flow intensity */}
             <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
               {["Light", "Medium", "Heavy", "Spotting"].map((flow) => (
                 <div
                   key={flow}
                   onClick={() => setPeriodFlow(flow)}
                   style={{
-                    flex: 1,
-                    padding: "10px 4px",
-                    borderRadius: "12px",
+                    flex: 1, padding: "10px 4px", borderRadius: "12px",
                     border: `1px solid ${periodFlow === flow ? "#F2C4CE" : "#E8E4F0"}`,
                     backgroundColor: periodFlow === flow ? "#FDF0EC" : "transparent",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    fontSize: "11px",
+                    textAlign: "center", cursor: "pointer", fontSize: "11px",
                     fontWeight: periodFlow === flow ? "500" : "400",
                     color: periodFlow === flow ? "#0D0D0D" : "#6B6560",
                     transition: "all 0.2s ease",
@@ -335,7 +299,6 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
               ))}
             </div>
 
-            {/* Pain level */}
             <div style={{ marginBottom: "28px" }}>
               <div style={{ fontSize: "13px", color: "#0D0D0D", fontWeight: "500", marginBottom: "12px" }}>
                 Pain level <span style={{ color: "#6B6560", fontWeight: "400" }}>({periodPain}/10)</span>
@@ -346,24 +309,17 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
                 style={{ width: "100%", accentColor: "#F2C4CE" }}
               />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#6B6560", marginTop: "4px" }}>
-                <span>No pain</span>
-                <span>Severe</span>
+                <span>No pain</span><span>Severe</span>
               </div>
             </div>
 
-            {/* Save button */}
             <div
               onClick={handlePeriodSave}
               style={{
                 backgroundColor: periodSaved ? "#D4E4D8" : "#0D0D0D",
-                color: "#FAF7F2",
-                borderRadius: "100px",
-                padding: "16px",
-                textAlign: "center",
-                cursor: "pointer",
-                fontSize: "15px",
-                fontWeight: "500",
-                transition: "all 0.3s ease",
+                color: "#FAF7F2", borderRadius: "100px", padding: "16px",
+                textAlign: "center", cursor: "pointer", fontSize: "15px",
+                fontWeight: "500", transition: "all 0.3s ease",
               }}
             >
               {periodSaved ? "Logged ✓" : "Save log"}
@@ -374,50 +330,31 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
 
       {/* FOOD LOG BOTTOM SHEET */}
       {activeSheet === "food" && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 100,
-          backgroundColor: "rgba(0,0,0,0.3)",
-          display: "flex", alignItems: "flex-end",
-        }}
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 100, backgroundColor: "rgba(0,0,0,0.3)", display: "flex", alignItems: "flex-end" }}
           onClick={() => setActiveSheet(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             className="fade-up-1"
-            style={{
-              width: "100%",
-              backgroundColor: "#FAF7F2",
-              borderRadius: "24px 24px 0 0",
-              padding: "28px 24px 48px",
-              maxWidth: "480px",
-              margin: "0 auto",
-            }}
+            style={{ width: "100%", backgroundColor: "#FAF7F2", borderRadius: "24px 24px 0 0", padding: "28px 24px 48px", maxWidth: "480px", margin: "0 auto" }}
           >
             <div style={{ width: "36px", height: "4px", backgroundColor: "#E8E4F0", borderRadius: "2px", margin: "0 auto 24px" }} />
+            <div style={{ fontSize: "20px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "4px" }}>Log your meal</div>
+            <div style={{ fontSize: "13px", color: "#6B6560", marginBottom: "24px" }}>What did you eat?</div>
 
-            <div style={{ fontSize: "20px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "4px" }}>
-              Log your meal
-            </div>
-            <div style={{ fontSize: "13px", color: "#6B6560", marginBottom: "24px" }}>
-              What did you eat?
-            </div>
-
-            {/* Meal type */}
             <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
               {["Breakfast", "Lunch", "Dinner", "Snack"].map((type) => (
                 <div
                   key={type}
                   onClick={() => setMealType(type)}
                   style={{
-                    padding: "8px 16px",
-                    borderRadius: "100px",
+                    padding: "8px 16px", borderRadius: "100px",
                     border: `1px solid ${mealType === type ? "#0D0D0D" : "#E8E4F0"}`,
                     backgroundColor: mealType === type ? "#0D0D0D" : "transparent",
                     color: mealType === type ? "#FAF7F2" : "#6B6560",
-                    fontSize: "12px",
-                    fontWeight: mealType === type ? "500" : "400",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
+                    fontSize: "12px", fontWeight: mealType === type ? "500" : "400",
+                    cursor: "pointer", transition: "all 0.2s ease",
                   }}
                 >
                   {type}
@@ -425,25 +362,17 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
               ))}
             </div>
 
-            {/* Food text input */}
             <textarea
               placeholder="e.g. Idli with sambar and coconut chutney..."
               value={foodText}
               onChange={(e) => setFoodText(e.target.value)}
               rows={3}
               style={{
-                width: "100%",
-                backgroundColor: "#FDF0EC",
-                border: "0.5px solid #E8E4F0",
-                borderRadius: "16px",
-                padding: "14px 16px",
-                fontSize: "14px",
-                color: "#0D0D0D",
-                fontFamily: "DM Sans, sans-serif",
-                resize: "none",
-                outline: "none",
-                marginBottom: "20px",
-                boxSizing: "border-box",
+                width: "100%", backgroundColor: "#FDF0EC",
+                border: "0.5px solid #E8E4F0", borderRadius: "16px",
+                padding: "14px 16px", fontSize: "14px", color: "#0D0D0D",
+                fontFamily: "DM Sans, sans-serif", resize: "none",
+                outline: "none", marginBottom: "16px", boxSizing: "border-box",
               }}
             />
 
@@ -451,19 +380,13 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
               ✦ AI meal analysis coming soon — we'll tell you the insulin impact of your meal!
             </div>
 
-            {/* Save button */}
             <div
               onClick={handleFoodSave}
               style={{
                 backgroundColor: foodSaved ? "#D4E4D8" : "#0D0D0D",
-                color: "#FAF7F2",
-                borderRadius: "100px",
-                padding: "16px",
-                textAlign: "center",
-                cursor: "pointer",
-                fontSize: "15px",
-                fontWeight: "500",
-                transition: "all 0.3s ease",
+                color: "#FAF7F2", borderRadius: "100px", padding: "16px",
+                textAlign: "center", cursor: "pointer", fontSize: "15px",
+                fontWeight: "500", transition: "all 0.3s ease",
               }}
             >
               {foodSaved ? "Logged ✓" : "Save meal"}
@@ -471,6 +394,7 @@ const outerDashoffset = outerCircumference - (outerProgress * outerCircumference
           </div>
         </div>
       )}
+
     </div>
   )
 }
