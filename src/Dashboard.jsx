@@ -79,11 +79,21 @@ function Dashboard({ userData }) {
     },
   ]
 
-  const size = 200
-  const strokeWidth = 12
-  const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
+  const size = 220
+const strokeWidth = 12
+const radius = (size - strokeWidth) / 2
+const circumference = 2 * Math.PI * radius
+const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
+
+// Outer black countdown arc
+const outerSize = 220
+const outerStrokeWidth = 3
+const outerRadius = (outerSize / 2) - outerStrokeWidth
+const outerCircumference = 2 * Math.PI * outerRadius
+const daysRemaining = daysUntilPeriod || 0
+const totalDays = 28
+const outerProgress = daysRemaining / totalDays
+const outerDashoffset = outerCircumference - (outerProgress * outerCircumference)
 
   const handlePeriodSave = () => {
     if (!periodFlow) return
@@ -143,15 +153,29 @@ function Dashboard({ userData }) {
       }}>
         <div style={{ position: "relative", width: size, height: size }}>
           <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-            <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#E8E4F0" strokeWidth={strokeWidth} />
-            <circle
-              cx={size/2} cy={size/2} r={radius} fill="none"
-              stroke={phaseColor} strokeWidth={strokeWidth}
-              strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              style={{ transition: "stroke-dashoffset 0.6s ease" }}
-            />
-          </svg>
+  {/* Base track */}
+  <circle
+    cx={size / 2} cy={size / 2} r={radius}
+    fill="none" stroke="#E8E4F0" strokeWidth={strokeWidth}
+  />
+  {/* Phase color arc */}
+  <circle
+    cx={size / 2} cy={size / 2} r={radius}
+    fill="none" stroke={phaseColor} strokeWidth={strokeWidth}
+    strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+    strokeLinecap="round"
+    style={{ transition: "stroke-dashoffset 0.6s ease" }}
+  />
+  {/* Outer black countdown arc */}
+  <circle
+    cx={outerSize / 2} cy={outerSize / 2} r={outerRadius}
+    fill="none" stroke="#0D0D0D" strokeWidth={outerStrokeWidth}
+    strokeDasharray={outerCircumference}
+    strokeDashoffset={outerDashoffset}
+    strokeLinecap="round"
+    style={{ transition: "stroke-dashoffset 0.6s ease" }}
+  />
+</svg>
           <div style={{
             position: "absolute", top: "50%", left: "50%",
             transform: "translate(-50%, -50%)", textAlign: "center",
