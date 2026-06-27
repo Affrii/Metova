@@ -38,6 +38,7 @@ function SymptomTracker({ userData }) {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+    console.log("Save triggered!")
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -368,9 +369,9 @@ function SymptomTracker({ userData }) {
           </div>
         )}
 
-        {/* Save button */}
+       {/* Save button */}
         <div className="fade-up-10" style={{ marginTop: "8px" }}>
-          <button onClick={handleSave} disabled={saving} style={{
+          <button onClick={handleSave} style={{
             width: "100%",
             backgroundColor: saved ? "#D4E4D8" : "#0D0D0D",
             color: saved ? "#2A5A3A" : "#FAF7F2",
