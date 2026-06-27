@@ -44,7 +44,7 @@ function SymptomTracker({ userData }) {
       console.log("2. Getting session...")
       const { data: { session } } = await supabase.auth.getSession()
       console.log("3. Session:", session)
-      
+
       if (!session?.user) {
         console.log("4. No user found!")
         setError("Not logged in")
@@ -93,67 +93,6 @@ function SymptomTracker({ userData }) {
 
     } catch (err) {
       console.error("9. Catch error:", err)
-      setError("Something went wrong")
-    }
-
-    setSaving(false)
-  }
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        setError("Not logged in")
-        setSaving(false)
-        return
-      }
-
-      const today = new Date().toISOString().split("T")[0]
-
-      // Save to daily_symptom_logs
-      const { error: symptomError } = await supabase
-        .from("daily_symptom_logs")
-        .upsert({
-          user_id: session.user.id,
-          log_date: today,
-          energy_level: energyLevel,
-          mood_score: moodScore,
-          mood_tags: moodTags,
-          sleep_hours: sleepHours,
-          sleep_quality: sleepQuality,
-          hair_shedding_scale: hairShedding,
-          stress_level: stressLevel,
-          exercise_done: exerciseDone,
-          water_intake_ml: waterIntake * 250,
-        }, { onConflict: "user_id, log_date" })
-
-      if (symptomError) {
-        console.error("Symptom log error:", symptomError)
-        setError("Failed to save symptom log")
-        setSaving(false)
-        return
-      }
-
-      // Save to skin_logs
-      const { error: skinError } = await supabase
-        .from("skin_logs")
-        .upsert({
-          user_id: session.user.id,
-          log_date: today,
-          acne_zones: acneZones,
-        }, { onConflict: "user_id, log_date" })
-
-      if (skinError) {
-        console.error("Skin log error:", skinError)
-        setError("Failed to save skin log")
-        setSaving(false)
-        return
-      }
-
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-
-    } catch (err) {
-      console.error("Save error:", err)
       setError("Something went wrong")
     }
 
@@ -428,7 +367,7 @@ function SymptomTracker({ userData }) {
           </div>
         )}
 
-       {/* Save button */}
+        {/* Save button */}
         <div className="fade-up-10" style={{ marginTop: "8px" }}>
           <button onClick={handleSave} style={{
             width: "100%",
@@ -446,5 +385,6 @@ function SymptomTracker({ userData }) {
       </div>
     </div>
   )
+}
 
 export default SymptomTracker
