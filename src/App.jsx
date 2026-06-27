@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import Onboarding from "./Onboarding"
 import Dashboard from "./Dashboard"
-import CycleTracker from "./Cycletracker"
+import CycleTracker from "./CycleTracker"
 import SymptomTracker from "./SymptomTracker"
 import AIChat from "./AIChat"
 import Insights from "./Insights"
@@ -112,7 +112,6 @@ function App() {
         } else {
           console.log("Period log saved! ✅")
         }
-      }
     }
 
     setScreen("main")
@@ -331,5 +330,6 @@ function App() {
       )}
     </div>
   )
+}
 
 export default App
