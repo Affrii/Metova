@@ -1,6 +1,7 @@
 import { useState } from "react"
+import { supabase } from "./supabase"
 
-function SymptomTracker() {
+function SymptomTracker({ userData }) {
   const [energyLevel, setEnergyLevel] = useState(5)
   const [moodScore, setMoodScore] = useState(5)
   const [stressLevel, setStressLevel] = useState(5)
@@ -19,6 +20,8 @@ function SymptomTracker() {
   })
   const [moodTags, setMoodTags] = useState([])
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
 
   const toggleZone = (zone) => {
     setAcneZones({ ...acneZones, [zone]: !acneZones[zone] })
@@ -32,9 +35,69 @@ function SymptomTracker() {
     }
   }
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        setError("Not logged in")
+        setSaving(false)
+        return
+      }
+
+      const today = new Date().toISOString().split("T")[0]
+
+      // Save to daily_symptom_logs
+      const { error: symptomError } = await supabase
+        .from("daily_symptom_logs")
+        .upsert({
+          user_id: session.user.id,
+          log_date: today,
+          energy_level: energyLevel,
+          mood_score: moodScore,
+          mood_tags: moodTags,
+          sleep_hours: sleepHours,
+          sleep_quality: sleepQuality,
+          hair_shedding_scale: hairShedding,
+          stress_level: stressLevel,
+          exercise_done: exerciseDone,
+          water_intake_ml: waterIntake * 250,
+        }, { onConflict: "user_id, log_date" })
+
+      if (symptomError) {
+        console.error("Symptom log error:", symptomError)
+        setError("Failed to save symptom log")
+        setSaving(false)
+        return
+      }
+
+      // Save to skin_logs
+      const { error: skinError } = await supabase
+        .from("skin_logs")
+        .upsert({
+          user_id: session.user.id,
+          log_date: today,
+          acne_zones: acneZones,
+        }, { onConflict: "user_id, log_date" })
+
+      if (skinError) {
+        console.error("Skin log error:", skinError)
+        setError("Failed to save skin log")
+        setSaving(false)
+        return
+      }
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+
+    } catch (err) {
+      console.error("Save error:", err)
+      setError("Something went wrong")
+    }
+
+    setSaving(false)
   }
 
   const today = new Date().toLocaleDateString("en-IN", {
@@ -85,11 +148,7 @@ function SymptomTracker() {
     }}>
 
       {/* Header */}
-      <div style={{
-        padding: "52px 24px 24px",
-        maxWidth: "480px",
-        margin: "0 auto",
-      }}>
+      <div style={{ padding: "52px 24px 24px", maxWidth: "480px", margin: "0 auto" }}>
         <h1 className="fade-up-1" style={{
           fontSize: "28px",
           fontFamily: "Cormorant Garamond, serif",
@@ -99,40 +158,20 @@ function SymptomTracker() {
         }}>
           Daily symptom log
         </h1>
-        <p className="fade-up-2" style={{
-          fontSize: "13px",
-          color: "#6B6560",
-          margin: "0",
-        }}>
+        <p className="fade-up-2" style={{ fontSize: "13px", color: "#6B6560", margin: "0" }}>
           {today}
         </p>
       </div>
 
-      <div style={{
-        padding: "0 24px",
-        maxWidth: "480px",
-        margin: "0 auto",
-      }}>
+      <div style={{ padding: "0 24px", maxWidth: "480px", margin: "0 auto" }}>
 
         {/* SKIN */}
         <div className="fade-up-3" style={cardStyle}>
           <label style={labelStyle}>Skin — tap zones with acne</label>
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "16px",
-          }}>
-            <div style={{
-              position: "relative",
-              width: "180px",
-              height: "220px",
-            }}>
-              <svg
-                viewBox="0 0 180 220"
-                width="180"
-                height="220"
-                style={{ position: "absolute", top: 0, left: 0 }}
-              >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+            <div style={{ position: "relative", width: "180px", height: "220px" }}>
+              <svg viewBox="0 0 180 220" width="180" height="220"
+                style={{ position: "absolute", top: 0, left: 0 }}>
                 <ellipse cx="90" cy="115" rx="70" ry="90"
                   fill="#FDF0EC" stroke="#E8E4F0" strokeWidth="1" />
                 <ellipse cx="65" cy="100" rx="8" ry="5" fill="#E8E4F0" />
@@ -142,84 +181,29 @@ function SymptomTracker() {
                   stroke="#E8E4F0" strokeWidth="2" strokeLinecap="round" />
               </svg>
 
-              <div onClick={() => toggleZone("forehead")} style={{
-                position: "absolute", top: "18px", left: "50%",
-                transform: "translateX(-50%)", width: "80px", height: "30px",
-                borderRadius: "100px",
-                backgroundColor: acneZones.forehead ? "#F2C4CE" : "transparent",
-                border: acneZones.forehead ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "9px",
-                color: acneZones.forehead ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-              }}>Forehead</div>
-
-              <div onClick={() => toggleZone("leftCheek")} style={{
-                position: "absolute", top: "110px", left: "8px",
-                width: "36px", height: "36px", borderRadius: "50%",
-                backgroundColor: acneZones.leftCheek ? "#F2C4CE" : "transparent",
-                border: acneZones.leftCheek ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "8px",
-                color: acneZones.leftCheek ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-                textAlign: "center", lineHeight: "1.2",
-              }}>L</div>
-
-              <div onClick={() => toggleZone("rightCheek")} style={{
-                position: "absolute", top: "110px", right: "8px",
-                width: "36px", height: "36px", borderRadius: "50%",
-                backgroundColor: acneZones.rightCheek ? "#F2C4CE" : "transparent",
-                border: acneZones.rightCheek ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "8px",
-                color: acneZones.rightCheek ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-              }}>R</div>
-
-              <div onClick={() => toggleZone("nose")} style={{
-                position: "absolute", top: "118px", left: "50%",
-                transform: "translateX(-50%)", width: "28px", height: "28px",
-                borderRadius: "50%",
-                backgroundColor: acneZones.nose ? "#F2C4CE" : "transparent",
-                border: acneZones.nose ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "8px",
-                color: acneZones.nose ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-              }}>N</div>
-
-              <div onClick={() => toggleZone("chin")} style={{
-                position: "absolute", bottom: "30px", left: "50%",
-                transform: "translateX(-50%)", width: "44px", height: "28px",
-                borderRadius: "100px",
-                backgroundColor: acneZones.chin ? "#F2C4CE" : "transparent",
-                border: acneZones.chin ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "8px",
-                color: acneZones.chin ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-              }}>Chin</div>
-
-              <div onClick={() => toggleZone("jawline")} style={{
-                position: "absolute", bottom: "8px", left: "50%",
-                transform: "translateX(-50%)", width: "110px", height: "22px",
-                borderRadius: "100px",
-                backgroundColor: acneZones.jawline ? "#F2C4CE" : "transparent",
-                border: acneZones.jawline ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
-                cursor: "pointer", display: "flex", alignItems: "center",
-                justifyContent: "center", fontSize: "9px",
-                color: acneZones.jawline ? "#8A3A4A" : "#6B6560",
-                fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
-              }}>Jawline</div>
+              {[
+                { key: "forehead", label: "Forehead", style: { top: "18px", left: "50%", transform: "translateX(-50%)", width: "80px", height: "30px", borderRadius: "100px" } },
+                { key: "leftCheek", label: "L", style: { top: "110px", left: "8px", width: "36px", height: "36px", borderRadius: "50%" } },
+                { key: "rightCheek", label: "R", style: { top: "110px", right: "8px", width: "36px", height: "36px", borderRadius: "50%" } },
+                { key: "nose", label: "N", style: { top: "118px", left: "50%", transform: "translateX(-50%)", width: "28px", height: "28px", borderRadius: "50%" } },
+                { key: "chin", label: "Chin", style: { bottom: "30px", left: "50%", transform: "translateX(-50%)", width: "44px", height: "28px", borderRadius: "100px" } },
+                { key: "jawline", label: "Jawline", style: { bottom: "8px", left: "50%", transform: "translateX(-50%)", width: "110px", height: "22px", borderRadius: "100px" } },
+              ].map(({ key, label, style }) => (
+                <div key={key} onClick={() => toggleZone(key)} style={{
+                  position: "absolute", ...style,
+                  backgroundColor: acneZones[key] ? "#F2C4CE" : "transparent",
+                  border: acneZones[key] ? "1.5px solid #E8A0B0" : "1.5px dashed #E8E4F0",
+                  cursor: "pointer", display: "flex", alignItems: "center",
+                  justifyContent: "center", fontSize: "9px",
+                  color: acneZones[key] ? "#8A3A4A" : "#6B6560",
+                  fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
+                }}>{label}</div>
+              ))}
             </div>
           </div>
 
           {Object.values(acneZones).some(Boolean) && (
-            <div style={{
-              fontSize: "12px", color: "#6B6560",
-              textAlign: "center", marginTop: "8px",
-            }}>
+            <div style={{ fontSize: "12px", color: "#6B6560", textAlign: "center", marginTop: "8px" }}>
               Acne logged:{" "}
               <span style={{ color: "#0D0D0D", fontWeight: "500" }}>
                 {Object.entries(acneZones)
@@ -233,30 +217,20 @@ function SymptomTracker() {
 
         {/* HAIR SHEDDING */}
         <div className="fade-up-4" style={cardStyle}>
-          <label style={labelStyle}>
-            Hair shedding — {hairLabels[hairShedding - 1]}
-          </label>
-          <div style={{
-            display: "flex", gap: "8px", justifyContent: "space-between",
-          }}>
+          <label style={labelStyle}>Hair shedding — {hairLabels[hairShedding - 1]}</label>
+          <div style={{ display: "flex", gap: "8px", justifyContent: "space-between" }}>
             {[1, 2, 3, 4, 5].map((level) => (
-              <button key={level} onClick={() => setHairShedding(level)}
-                style={{
-                  flex: 1, padding: "12px 4px", borderRadius: "12px",
-                  border: hairShedding === level ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
-                  backgroundColor: hairShedding === level ? "#E8E4F0" : "#FAF7F2",
-                  color: "#0D0D0D", fontSize: "13px",
-                  fontFamily: "DM Sans, sans-serif", cursor: "pointer",
-                  fontWeight: hairShedding === level ? "500" : "400",
-                }}>
-                {level}
-              </button>
+              <button key={level} onClick={() => setHairShedding(level)} style={{
+                flex: 1, padding: "12px 4px", borderRadius: "12px",
+                border: hairShedding === level ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
+                backgroundColor: hairShedding === level ? "#E8E4F0" : "#FAF7F2",
+                color: "#0D0D0D", fontSize: "13px",
+                fontFamily: "DM Sans, sans-serif", cursor: "pointer",
+                fontWeight: hairShedding === level ? "500" : "400",
+              }}>{level}</button>
             ))}
           </div>
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            fontSize: "10px", color: "#6B6560", marginTop: "6px",
-          }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#6B6560", marginTop: "6px" }}>
             <span>None</span><span>Severe</span>
           </div>
         </div>
@@ -265,12 +239,8 @@ function SymptomTracker() {
         <div className="fade-up-5" style={cardStyle}>
           <label style={labelStyle}>Energy level — {energyLevel}/10</label>
           <input type="range" min="1" max="10" value={energyLevel}
-            onChange={(e) => setEnergyLevel(Number(e.target.value))}
-            style={sliderStyle} />
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            fontSize: "10px", color: "#6B6560",
-          }}>
+            onChange={(e) => setEnergyLevel(Number(e.target.value))} style={sliderStyle} />
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#6B6560" }}>
             <span>Exhausted</span><span>Energised</span>
           </div>
         </div>
@@ -279,32 +249,22 @@ function SymptomTracker() {
         <div className="fade-up-6" style={cardStyle}>
           <label style={labelStyle}>Mood — {moodScore}/10</label>
           <input type="range" min="1" max="10" value={moodScore}
-            onChange={(e) => setMoodScore(Number(e.target.value))}
-            style={sliderStyle} />
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            fontSize: "10px", color: "#6B6560", marginBottom: "12px",
-          }}>
+            onChange={(e) => setMoodScore(Number(e.target.value))} style={sliderStyle} />
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#6B6560", marginBottom: "12px" }}>
             <span>Low</span><span>Great</span>
           </div>
-          <div style={{
-            fontSize: "11px", color: "#6B6560",
-            textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px",
-          }}>
+          <div style={{ fontSize: "11px", color: "#6B6560", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
             How are you feeling?
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {moodTagOptions.map((tag) => (
-              <button key={tag} onClick={() => toggleMoodTag(tag)}
-                style={{
-                  padding: "6px 14px", borderRadius: "100px",
-                  border: moodTags.includes(tag) ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
-                  backgroundColor: moodTags.includes(tag) ? "#E8E4F0" : "#FAF7F2",
-                  color: "#0D0D0D", fontSize: "12px",
-                  fontFamily: "DM Sans, sans-serif", cursor: "pointer",
-                }}>
-                {tag}
-              </button>
+              <button key={tag} onClick={() => toggleMoodTag(tag)} style={{
+                padding: "6px 14px", borderRadius: "100px",
+                border: moodTags.includes(tag) ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
+                backgroundColor: moodTags.includes(tag) ? "#E8E4F0" : "#FAF7F2",
+                color: "#0D0D0D", fontSize: "12px",
+                fontFamily: "DM Sans, sans-serif", cursor: "pointer",
+              }}>{tag}</button>
             ))}
           </div>
         </div>
@@ -313,32 +273,22 @@ function SymptomTracker() {
         <div className="fade-up-7" style={cardStyle}>
           <label style={labelStyle}>Sleep — {sleepHours} hours</label>
           <input type="range" min="2" max="12" step="0.5" value={sleepHours}
-            onChange={(e) => setSleepHours(Number(e.target.value))}
-            style={sliderStyle} />
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            fontSize: "10px", color: "#6B6560", marginBottom: "16px",
-          }}>
+            onChange={(e) => setSleepHours(Number(e.target.value))} style={sliderStyle} />
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#6B6560", marginBottom: "16px" }}>
             <span>2h</span><span>12h</span>
           </div>
-          <div style={{
-            fontSize: "11px", color: "#6B6560",
-            textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px",
-          }}>
+          <div style={{ fontSize: "11px", color: "#6B6560", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
             Sleep quality — {sleepQualityLabels[sleepQuality - 1]}
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             {[1, 2, 3, 4, 5].map((q) => (
-              <button key={q} onClick={() => setSleepQuality(q)}
-                style={{
-                  flex: 1, padding: "10px 4px", borderRadius: "12px",
-                  border: sleepQuality === q ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
-                  backgroundColor: sleepQuality === q ? "#E8E4F0" : "#FAF7F2",
-                  color: "#0D0D0D", fontSize: "12px",
-                  fontFamily: "DM Sans, sans-serif", cursor: "pointer",
-                }}>
-                {q}
-              </button>
+              <button key={q} onClick={() => setSleepQuality(q)} style={{
+                flex: 1, padding: "10px 4px", borderRadius: "12px",
+                border: sleepQuality === q ? "1px solid #0D0D0D" : "0.5px solid #E8E4F0",
+                backgroundColor: sleepQuality === q ? "#E8E4F0" : "#FAF7F2",
+                color: "#0D0D0D", fontSize: "12px",
+                fontFamily: "DM Sans, sans-serif", cursor: "pointer",
+              }}>{q}</button>
             ))}
           </div>
         </div>
@@ -347,80 +297,56 @@ function SymptomTracker() {
         <div className="fade-up-8" style={cardStyle}>
           <label style={labelStyle}>Stress level — {stressLevel}/10</label>
           <input type="range" min="1" max="10" value={stressLevel}
-            onChange={(e) => setStressLevel(Number(e.target.value))}
-            style={sliderStyle} />
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            fontSize: "10px", color: "#6B6560",
-          }}>
+            onChange={(e) => setStressLevel(Number(e.target.value))} style={sliderStyle} />
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#6B6560" }}>
             <span>Calm</span><span>Very stressed</span>
           </div>
         </div>
 
         {/* WATER INTAKE */}
         <div className="fade-up-9" style={cardStyle}>
-          <label style={labelStyle}>
-            Water intake — {waterIntake} glasses
-          </label>
-          <div style={{
-            display: "flex", alignItems: "center",
-            gap: "16px", justifyContent: "center",
-          }}>
-            <button onClick={() => setWaterIntake(Math.max(0, waterIntake - 1))}
-              style={{
-                width: "40px", height: "40px", borderRadius: "50%",
-                border: "0.5px solid #E8E4F0", backgroundColor: "#FAF7F2",
-                fontSize: "20px", cursor: "pointer", display: "flex",
-                alignItems: "center", justifyContent: "center", color: "#0D0D0D",
-              }}>−</button>
+          <label style={labelStyle}>Water intake — {waterIntake} glasses</label>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center" }}>
+            <button onClick={() => setWaterIntake(Math.max(0, waterIntake - 1))} style={{
+              width: "40px", height: "40px", borderRadius: "50%",
+              border: "0.5px solid #E8E4F0", backgroundColor: "#FAF7F2",
+              fontSize: "20px", cursor: "pointer", display: "flex",
+              alignItems: "center", justifyContent: "center", color: "#0D0D0D",
+            }}>−</button>
             <div style={{
               fontSize: "36px", fontFamily: "Cormorant Garamond, serif",
               color: "#0D0D0D", minWidth: "60px", textAlign: "center",
-            }}>
-              {waterIntake}
-            </div>
-            <button onClick={() => setWaterIntake(waterIntake + 1)}
-              style={{
-                width: "40px", height: "40px", borderRadius: "50%",
-                border: "0.5px solid #E8E4F0", backgroundColor: "#FAF7F2",
-                fontSize: "20px", cursor: "pointer", display: "flex",
-                alignItems: "center", justifyContent: "center", color: "#0D0D0D",
-              }}>+</button>
+            }}>{waterIntake}</div>
+            <button onClick={() => setWaterIntake(waterIntake + 1)} style={{
+              width: "40px", height: "40px", borderRadius: "50%",
+              border: "0.5px solid #E8E4F0", backgroundColor: "#FAF7F2",
+              fontSize: "20px", cursor: "pointer", display: "flex",
+              alignItems: "center", justifyContent: "center", color: "#0D0D0D",
+            }}>+</button>
           </div>
-          <div style={{
-            textAlign: "center", fontSize: "11px",
-            color: "#6B6560", marginTop: "8px",
-          }}>
+          <div style={{ textAlign: "center", fontSize: "11px", color: "#6B6560", marginTop: "8px" }}>
             Aim for 8+ glasses daily
           </div>
         </div>
 
         {/* EXERCISE */}
-        <div
-          className="fade-up-10"
-          style={{
-            ...cardStyle,
-            display: "flex", alignItems: "center",
-            justifyContent: "space-between", cursor: "pointer",
-          }}
-          onClick={() => setExerciseDone(!exerciseDone)}
-        >
+        <div className="fade-up-10" style={{
+          ...cardStyle,
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between", cursor: "pointer",
+        }} onClick={() => setExerciseDone(!exerciseDone)}>
           <div>
-            <div style={{
-              fontSize: "14px", fontWeight: "500",
-              color: "#0D0D0D", marginBottom: "2px",
-            }}>
+            <div style={{ fontSize: "14px", fontWeight: "500", color: "#0D0D0D", marginBottom: "2px" }}>
               Exercise today
             </div>
             <div style={{ fontSize: "12px", color: "#6B6560" }}>
-              Any movement counts 🤍
+              Any movement counts
             </div>
           </div>
           <div style={{
             width: "44px", height: "24px", borderRadius: "100px",
             backgroundColor: exerciseDone ? "#0D0D0D" : "#E8E4F0",
-            position: "relative", transition: "background-color 0.2s ease",
-            flexShrink: 0,
+            position: "relative", transition: "background-color 0.2s ease", flexShrink: 0,
           }}>
             <div style={{
               position: "absolute", top: "2px",
@@ -431,23 +357,32 @@ function SymptomTracker() {
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div style={{
+            backgroundColor: "#FDE8E8", border: "0.5px solid #F2C4C4",
+            borderRadius: "12px", padding: "12px 16px",
+            fontSize: "13px", color: "#8A3A3A", marginBottom: "12px",
+          }}>
+            {error}
+          </div>
+        )}
+
         {/* Save button */}
         <div className="fade-up-10" style={{ marginTop: "8px" }}>
-          <button
-            onClick={handleSave}
-            style={{
-              width: "100%",
-              backgroundColor: saved ? "#D4E4D8" : "#0D0D0D",
-              color: saved ? "#2A5A3A" : "#FAF7F2",
-              border: "none", borderRadius: "100px", padding: "16px",
-              fontSize: "15px", fontFamily: "DM Sans, sans-serif",
-              fontWeight: "500", cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
-          >
-            {saved ? "Saved today's log ✓" : "Save today's log"}
+          <button onClick={handleSave} disabled={saving} style={{
+            width: "100%",
+            backgroundColor: saved ? "#D4E4D8" : "#0D0D0D",
+            color: saved ? "#2A5A3A" : "#FAF7F2",
+            border: "none", borderRadius: "100px", padding: "16px",
+            fontSize: "15px", fontFamily: "DM Sans, sans-serif",
+            fontWeight: "500", cursor: saving ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease", opacity: saving ? 0.7 : 1,
+          }}>
+            {saving ? "Saving..." : saved ? "Saved today's log ✓" : "Save today's log"}
           </button>
         </div>
+
       </div>
     </div>
   )
