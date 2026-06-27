@@ -100,13 +100,13 @@ function App() {
       }
 
       // Save to period_logs
-      if (data.lastPeriod) {
-        const { error: periodError } = await supabase
-          .from("period_logs")
-          .insert({
-            user_id: supabaseUser.id,
-            start_date: data.lastPeriod,
-          })
+    const { error: periodError } = await supabase
+      .from("period_logs")
+      .upsert({
+         user_id: supabaseUser.id,
+         start_date: data.lastPeriod,
+     }, { onConflict: "user_id, start_date" })
+    
         if (periodError) {
           console.error("Period log error:", periodError)
         } else {
@@ -331,6 +331,5 @@ function App() {
       )}
     </div>
   )
-}
 
 export default App
