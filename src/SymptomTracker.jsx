@@ -36,9 +36,68 @@ function SymptomTracker({ userData }) {
   }
 
   const handleSave = async () => {
+    console.log("1. Save clicked!")
     setSaving(true)
     setError(null)
-    console.log("Save triggered!")
+
+    try {
+      console.log("2. Getting session...")
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log("3. Session:", session)
+      
+      if (!session?.user) {
+        console.log("4. No user found!")
+        setError("Not logged in")
+        setSaving(false)
+        return
+      }
+
+      console.log("5. User found:", session.user.id)
+      const today = new Date().toISOString().split("T")[0]
+      console.log("6. Saving for date:", today)
+
+      const { error: symptomError } = await supabase
+        .from("daily_symptom_logs")
+        .upsert({
+          user_id: session.user.id,
+          log_date: today,
+          energy_level: energyLevel,
+          mood_score: moodScore,
+          mood_tags: moodTags,
+          sleep_hours: sleepHours,
+          sleep_quality: sleepQuality,
+          hair_shedding_scale: hairShedding,
+          stress_level: stressLevel,
+          exercise_done: exerciseDone,
+          water_intake_ml: waterIntake * 250,
+        }, { onConflict: "user_id, log_date" })
+
+      console.log("7. Symptom error:", symptomError)
+
+      const { error: skinError } = await supabase
+        .from("skin_logs")
+        .upsert({
+          user_id: session.user.id,
+          log_date: today,
+          acne_zones: acneZones,
+        }, { onConflict: "user_id, log_date" })
+
+      console.log("8. Skin error:", skinError)
+
+      if (!symptomError && !skinError) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      } else {
+        setError("Failed to save — check console")
+      }
+
+    } catch (err) {
+      console.error("9. Catch error:", err)
+      setError("Something went wrong")
+    }
+
+    setSaving(false)
+  }
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -387,6 +446,5 @@ function SymptomTracker({ userData }) {
       </div>
     </div>
   )
-}
 
 export default SymptomTracker
