@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { supabase } from "./supabase"
 
-function CycleTracker({ userData }) {
+function CycleTracker({ userData, onBack }) {
   const [showLogSheet, setShowLogSheet] = useState(false)
   const [selectedFlow, setSelectedFlow] = useState("")
   const [painLevel, setPainLevel] = useState(0)
@@ -140,12 +140,22 @@ function CycleTracker({ userData }) {
 
       {/* Header */}
       <div style={{ padding: "52px 24px 0", maxWidth: "480px", margin: "0 auto" }}>
-        <h1 className="fade-up-1" style={{
-          fontSize: "28px", fontFamily: "Cormorant Garamond, serif",
-          fontWeight: "500", color: "#0D0D0D", margin: "0 0 4px",
-        }}>
-          Cycle tracker
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+  <h1 className="fade-up-1" style={{
+    fontSize: "28px", fontFamily: "Cormorant Garamond, serif",
+    fontWeight: "500", color: "#0D0D0D", margin: "0",
+  }}>
+    Cycle tracker
+  </h1>
+  <div onClick={onBack} style={{
+    width: "36px", height: "36px", borderRadius: "50%",
+    backgroundColor: "#FDF0EC", border: "0.5px solid #E8E4F0",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    cursor: "pointer", fontSize: "18px",
+  }}>
+    ×
+  </div>
+</div>
         <p className="fade-up-2" style={{ fontSize: "13px", color: "#6B6560", margin: "0 0 24px" }}>
           {phaseLabel[phase]} phase · Day {cycleDay}
         </p>

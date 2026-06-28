@@ -145,7 +145,12 @@ function App() {
     onCycleTap={() => setActiveTab("cycle")}
   />
 )}
-        {activeTab === "cycle" && <CycleTracker userData={userData} />}
+        {activeTab === "cycle" && (
+  <CycleTracker 
+    userData={userData}
+    onBack={() => setActiveTab("home")}
+  />
+)}
         {activeTab === "track" && <SymptomTracker userData={userData} />}
         {activeTab === "chat" && <AIChat userData={userData} />}
         {activeTab === "insights" && <Insights userData={userData} />}
