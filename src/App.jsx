@@ -139,7 +139,12 @@ function App() {
   if (screen === "main") {
     return (
       <div style={{ position: "relative" }}>
-        {activeTab === "home" && <Dashboard userData={userData} />}
+        {activeTab === "home" && (
+  <Dashboard 
+    userData={userData} 
+    onCycleTap={() => setActiveTab("cycle")}
+  />
+)}
         {activeTab === "cycle" && <CycleTracker userData={userData} />}
         {activeTab === "track" && <SymptomTracker userData={userData} />}
         {activeTab === "chat" && <AIChat userData={userData} />}

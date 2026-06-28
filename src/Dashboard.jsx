@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 
-function Dashboard({ userData }) {
+function Dashboard({ userData, onCycleTap }) {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [activeSheet, setActiveSheet] = useState(null)
   
@@ -123,7 +123,9 @@ function Dashboard({ userData }) {
 
       {/* Cycle ring */}
       <div className="fade-up-2" style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "32px 0 24px" }}>
-        <div style={{ position: "relative", width: size, height: size }}>
+        <div 
+        onClick={onCycleTap}
+        style={{ position: "relative", width: size, height: size, cursor: "pointer"  }}>
           <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
             <circle
               cx={size / 2} cy={size / 2} r={radius}
