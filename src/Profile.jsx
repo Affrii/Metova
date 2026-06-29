@@ -402,7 +402,9 @@ function Profile({ userData, onSignOut }) {
         {/* Sign out */}
         <div className="fade-up-10">
           <button onClick={() => {
-             onSignOut && onSignOut()
+  console.log("Sign out clicked!")
+  console.log("onSignOut:", onSignOut)
+  if (onSignOut) onSignOut()
           }} style={{
             width: "100%", backgroundColor: "transparent",
             border: "0.5px solid #E8E4F0", borderRadius: "100px",
