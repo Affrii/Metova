@@ -402,9 +402,7 @@ function Profile({ userData, onSignOut }) {
         {/* Sign out */}
         <div className="fade-up-10">
           <button onClick={() => {
-            if (window.confirm("Are you sure you want to sign out?")) {
-              onSignOut && onSignOut()
-            }
+             onSignOut && onSignOut()
           }} style={{
             width: "100%", backgroundColor: "transparent",
             border: "0.5px solid #E8E4F0", borderRadius: "100px",
