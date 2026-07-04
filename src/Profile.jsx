@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react"
-import { supabase } from "./supabase"
+import { useState } from "react"
 
 function Profile({ userData, onSignOut }) {
   const [notificationsOn, setNotificationsOn] = useState(true)
@@ -7,75 +6,28 @@ function Profile({ userData, onSignOut }) {
   const [cycleAlertsOn, setCycleAlertsOn] = useState(true)
   const [exportLoading, setExportLoading] = useState(false)
   const [exported, setExported] = useState(false)
-  const [healthData, setHealthData] = useState(null)
-  const [profileData, setProfileData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [editSheet, setEditSheet] = useState(null)
-  const [editValue, setEditValue] = useState("")
-  const [saving, setSaving] = useState(false)
 
-  useEffect(() => { fetchProfile() }, [])
-
-  const fetchProfile = async () => {
-    setLoading(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        setLoading(false)
-        return
-      }
-      const { data: profile } = await supabase
-        .from("profiles").select("*")
-        .eq("id", session.user.id).single()
-      const { data: health } = await supabase
-        .from("health_profiles").select("*")
-        .eq("user_id", session.user.id).single()
-      setProfileData(profile)
-      setHealthData(health)
-    } catch (err) {
-      console.error("Error fetching profile:", err)
-    }
-    setLoading(false)
-  }
-
-  const handleEdit = (field, currentValue) => {
-    setEditSheet(field)
-    setEditValue(currentValue || "")
-  }
-
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) return
-
-      if (editSheet === "fullName") {
-        await supabase.from("profiles").upsert({ id: session.user.id, full_name: editValue })
-      } else if (editSheet === "city") {
-        await supabase.from("health_profiles").upsert({ user_id: session.user.id, city: editValue })
-      } else if (editSheet === "dietType") {
-        await supabase.from("health_profiles").upsert({ user_id: session.user.id, diet_type: editValue.toLowerCase() })
-      } else if (editSheet === "activityLevel") {
-        await supabase.from("health_profiles").upsert({ user_id: session.user.id, activity_level: editValue.toLowerCase() })
-      } else if (editSheet === "pcosStatus") {
-        await supabase.from("health_profiles").upsert({ user_id: session.user.id, pcos_diagnosis_status: editValue.toLowerCase() })
-      }
-
-      await fetchProfile()
-      setEditSheet(null)
-      setEditValue("")
-    } catch (err) {
-      console.error("Save error:", err)
-    }
-    setSaving(false)
-  }
+  const name = userData?.fullName || "there"
+  const firstName = name.split(" ")[0]
+  const city = userData?.city || "India"
+  const pcosStatus = userData?.pcosStatus || "exploring"
+  const dietType = userData?.dietType || "not set"
+  const activityLevel = userData?.activityLevel || "not set"
 
   const handleExport = () => {
     setExportLoading(true)
     setTimeout(() => {
       const exportData = {
-        profile: profileData,
-        healthProfile: healthData,
+        profile: {
+          name: userData?.fullName,
+          dob: userData?.dob,
+          city: userData?.city,
+          pcosStatus: userData?.pcosStatus,
+          dietType: userData?.dietType,
+          activityLevel: userData?.activityLevel,
+          existingConditions: userData?.existingConditions,
+          familyHistory: userData?.familyHistory,
+        },
         exportedAt: new Date().toISOString(),
         exportedBy: "Metova Health",
       }
@@ -83,7 +35,7 @@ function Profile({ userData, onSignOut }) {
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `metova-health-data.json`
+      a.download = `metova-health-data-${firstName.toLowerCase()}.json`
       a.click()
       URL.revokeObjectURL(url)
       setExportLoading(false)
@@ -91,27 +43,6 @@ function Profile({ userData, onSignOut }) {
       setTimeout(() => setExported(false), 3000)
     }, 1500)
   }
-
-  const editOptions = {
-    dietType: ["vegetarian", "vegan", "non_vegetarian", "gluten_free", "no_restriction"],
-    activityLevel: ["sedentary", "light", "moderate", "active"],
-    pcosStatus: ["diagnosed", "suspected", "unsure", "exploring"],
-  }
-
-  const editLabels = {
-    fullName: "Full name",
-    city: "City",
-    dietType: "Diet type",
-    activityLevel: "Activity level",
-    pcosStatus: "PCOS status",
-  }
-
-  const name = profileData?.full_name || userData?.fullName || "there"
-  const firstName = name.split(" ")[0]
-  const city = healthData?.city || "Not set"
-  const pcosStatus = healthData?.pcos_diagnosis_status || "Not set"
-  const dietType = healthData?.diet_type || "Not set"
-  const activityLevel = healthData?.activity_level || "Not set"
 
   const sectionLabelStyle = {
     fontSize: "11px", fontFamily: "DM Sans, sans-serif",
@@ -163,22 +94,12 @@ function Profile({ userData, onSignOut }) {
     }}>Soon</span>
   )
 
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: "100vh", backgroundColor: "#FAF7F2",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "DM Sans, sans-serif", color: "#6B6560", fontSize: "14px",
-      }}>
-        Loading your profile...
-      </div>
-    )
-  }
-
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#FAF7F2", fontFamily: "DM Sans, sans-serif", paddingBottom: "100px" }}>
+    <div style={{
+      minHeight: "100vh", backgroundColor: "#FAF7F2",
+      fontFamily: "DM Sans, sans-serif", paddingBottom: "100px",
+    }}>
 
-      {/* Header */}
       <div style={{ padding: "52px 24px 24px", maxWidth: "480px", margin: "0 auto" }}>
         <h1 className="fade-up-1" style={{
           fontSize: "28px", fontFamily: "Cormorant Garamond, serif",
@@ -203,7 +124,10 @@ function Profile({ userData, onSignOut }) {
             {firstName.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: "18px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "2px" }}>
+            <div style={{
+              fontSize: "18px", fontFamily: "Cormorant Garamond, serif",
+              fontWeight: "500", color: "#0D0D0D", marginBottom: "2px",
+            }}>
               {name}
             </div>
             <div style={{ fontSize: "12px", color: "#6B6560", marginBottom: "8px" }}>
@@ -219,9 +143,6 @@ function Profile({ userData, onSignOut }) {
               ✦ Free plan
             </div>
           </div>
-          <div onClick={() => handleEdit("fullName", name)} style={{ cursor: "pointer" }}>
-            {chevron}
-          </div>
         </div>
       </div>
 
@@ -230,31 +151,35 @@ function Profile({ userData, onSignOut }) {
         {/* Health profile */}
         <label className="fade-up-3" style={sectionLabelStyle}>Health profile</label>
         <div className="fade-up-4" style={{ ...cardStyle, marginBottom: "20px" }}>
-          <div style={rowStyle} onClick={() => handleEdit("city", city)}>
-            <div>
-              <div style={rowLabelStyle}>City</div>
-              <div style={rowSubStyle}>{city}</div>
-            </div>
-            {chevron}
-          </div>
-          <div style={rowStyle} onClick={() => handleEdit("pcosStatus", pcosStatus)}>
-            <div>
-              <div style={rowLabelStyle}>PCOS status</div>
-              <div style={rowSubStyle}>{pcosStatus}</div>
-            </div>
-            {chevron}
-          </div>
-          <div style={rowStyle} onClick={() => handleEdit("dietType", dietType)}>
+          <div style={rowStyle}>
             <div>
               <div style={rowLabelStyle}>Diet type</div>
               <div style={rowSubStyle}>{dietType}</div>
             </div>
             {chevron}
           </div>
-          <div style={lastRowStyle} onClick={() => handleEdit("activityLevel", activityLevel)}>
+          <div style={rowStyle}>
             <div>
               <div style={rowLabelStyle}>Activity level</div>
               <div style={rowSubStyle}>{activityLevel}</div>
+            </div>
+            {chevron}
+          </div>
+          <div style={rowStyle}>
+            <div>
+              <div style={rowLabelStyle}>Current medications</div>
+              <div style={rowSubStyle}>
+                {userData?.medications?.length > 0 ? userData.medications.join(", ") : "None added"}
+              </div>
+            </div>
+            {chevron}
+          </div>
+          <div style={lastRowStyle}>
+            <div>
+              <div style={rowLabelStyle}>Supplements</div>
+              <div style={rowSubStyle}>
+                {userData?.supplements?.length > 0 ? userData.supplements.join(", ") : "None added"}
+              </div>
             </div>
             {chevron}
           </div>
@@ -409,79 +334,6 @@ function Profile({ userData, onSignOut }) {
           </div>
         </div>
       </div>
-
-      {/* EDIT BOTTOM SHEET */}
-      {editSheet && (
-        <div onClick={() => setEditSheet(null)} style={{
-          position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)",
-          display: "flex", alignItems: "flex-end", zIndex: 100,
-        }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            width: "100%", backgroundColor: "#FAF7F2",
-            borderRadius: "24px 24px 0 0", padding: "28px 24px 48px",
-            maxWidth: "480px", margin: "0 auto",
-          }}>
-            <div style={{ width: "36px", height: "4px", backgroundColor: "#E8E4F0", borderRadius: "2px", margin: "0 auto 24px" }} />
-
-            <div style={{
-              fontSize: "20px", fontFamily: "Cormorant Garamond, serif",
-              fontWeight: "500", color: "#0D0D0D", marginBottom: "20px",
-            }}>
-              Edit {editLabels[editSheet]}
-            </div>
-
-            {/* Text input for fullName and city */}
-            {(editSheet === "fullName" || editSheet === "city") && (
-              <input
-                type="text"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                placeholder={editSheet === "fullName" ? "Your full name" : "Your city"}
-                style={{
-                  width: "100%", backgroundColor: "#FDF0EC",
-                  border: "0.5px solid #E8E4F0", borderRadius: "12px",
-                  padding: "14px 16px", fontSize: "15px",
-                  color: "#0D0D0D", fontFamily: "DM Sans, sans-serif",
-                  outline: "none", marginBottom: "20px", boxSizing: "border-box",
-                }}
-              />
-            )}
-
-            {/* Pill selectors */}
-            {editOptions[editSheet] && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
-                {editOptions[editSheet].map((option) => (
-                  <div key={option} onClick={() => setEditValue(option)} style={{
-                    padding: "10px 18px", borderRadius: "100px",
-                    border: `1px solid ${editValue === option ? "#0D0D0D" : "#E8E4F0"}`,
-                    backgroundColor: editValue === option ? "#0D0D0D" : "transparent",
-                    color: editValue === option ? "#FAF7F2" : "#6B6560",
-                    fontSize: "13px", cursor: "pointer",
-                    fontFamily: "DM Sans, sans-serif",
-                    transition: "all 0.2s ease",
-                  }}>
-                    {option.replace(/_/g, " ")}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Save button */}
-            <div onClick={handleSave} style={{
-              backgroundColor: saving ? "#E8E4F0" : "#0D0D0D",
-              color: saving ? "#6B6560" : "#FAF7F2",
-              borderRadius: "100px", padding: "16px",
-              textAlign: "center", cursor: "pointer",
-              fontSize: "15px", fontWeight: "500",
-              fontFamily: "DM Sans, sans-serif",
-              transition: "all 0.3s ease",
-            }}>
-              {saving ? "Saving..." : "Save changes"}
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   )
 }
