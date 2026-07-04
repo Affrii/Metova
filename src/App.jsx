@@ -9,41 +9,27 @@ function Profile({ userData, onSignOut }) {
   const [exported, setExported] = useState(false)
   const [healthData, setHealthData] = useState(null)
   const [profileData, setProfileData] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  // Edit sheet state
   const [editSheet, setEditSheet] = useState(null)
   const [editValue, setEditValue] = useState("")
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  useEffect(() => { fetchProfile() }, [])
 
   const fetchProfile = async () => {
-    setLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) return
-
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single()
-
+        .from("profiles").select("*")
+        .eq("id", session.user.id).single()
       const { data: health } = await supabase
-        .from("health_profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single()
-
+        .from("health_profiles").select("*")
+        .eq("user_id", session.user.id).single()
       setProfileData(profile)
       setHealthData(health)
     } catch (err) {
       console.error("Error fetching profile:", err)
     }
-    setLoading(false)
   }
 
   const handleEdit = (field, currentValue) => {
@@ -56,34 +42,17 @@ function Profile({ userData, onSignOut }) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) return
-
       if (editSheet === "fullName") {
-        await supabase.from("profiles").upsert({
-          id: session.user.id,
-          full_name: editValue,
-        })
+        await supabase.from("profiles").upsert({ id: session.user.id, full_name: editValue })
       } else if (editSheet === "city") {
-        await supabase.from("health_profiles").upsert({
-          user_id: session.user.id,
-          city: editValue,
-        })
+        await supabase.from("health_profiles").upsert({ user_id: session.user.id, city: editValue })
       } else if (editSheet === "dietType") {
-        await supabase.from("health_profiles").upsert({
-          user_id: session.user.id,
-          diet_type: editValue.toLowerCase(),
-        })
+        await supabase.from("health_profiles").upsert({ user_id: session.user.id, diet_type: editValue.toLowerCase() })
       } else if (editSheet === "activityLevel") {
-        await supabase.from("health_profiles").upsert({
-          user_id: session.user.id,
-          activity_level: editValue.toLowerCase(),
-        })
+        await supabase.from("health_profiles").upsert({ user_id: session.user.id, activity_level: editValue.toLowerCase() })
       } else if (editSheet === "pcosStatus") {
-        await supabase.from("health_profiles").upsert({
-          user_id: session.user.id,
-          pcos_diagnosis_status: editValue.toLowerCase(),
-        })
+        await supabase.from("health_profiles").upsert({ user_id: session.user.id, pcos_diagnosis_status: editValue.toLowerCase() })
       }
-
       await fetchProfile()
       setEditSheet(null)
       setEditValue("")
@@ -122,6 +91,20 @@ function Profile({ userData, onSignOut }) {
   const dietType = healthData?.diet_type || "Not set"
   const activityLevel = healthData?.activity_level || "Not set"
 
+  const editOptions = {
+    dietType: ["vegetarian", "vegan", "non_vegetarian", "gluten_free", "no_restriction"],
+    activityLevel: ["sedentary", "light", "moderate", "active"],
+    pcosStatus: ["diagnosed", "suspected", "unsure", "exploring"],
+  }
+
+  const editLabels = {
+    fullName: "Full name",
+    city: "City",
+    dietType: "Diet type",
+    activityLevel: "Activity level",
+    pcosStatus: "PCOS status",
+  }
+
   const sectionLabelStyle = {
     fontSize: "11px", fontFamily: "DM Sans, sans-serif",
     color: "#6B6560", letterSpacing: "0.08em",
@@ -141,7 +124,6 @@ function Profile({ userData, onSignOut }) {
   }
 
   const lastRowStyle = { ...rowStyle, borderBottom: "none" }
-
   const rowLabelStyle = { fontSize: "14px", color: "#0D0D0D", fontFamily: "DM Sans, sans-serif" }
   const rowSubStyle = { fontSize: "12px", color: "#6B6560", fontFamily: "DM Sans, sans-serif", marginTop: "2px" }
 
@@ -173,37 +155,9 @@ function Profile({ userData, onSignOut }) {
     }}>Soon</span>
   )
 
-  // Edit sheet options
-  const editOptions = {
-    dietType: ["vegetarian", "vegan", "non_vegetarian", "gluten_free", "no_restriction"],
-    activityLevel: ["sedentary", "light", "moderate", "active"],
-    pcosStatus: ["diagnosed", "suspected", "unsure", "exploring"],
-  }
-
-  const editLabels = {
-    fullName: "Full name",
-    city: "City",
-    dietType: "Diet type",
-    activityLevel: "Activity level",
-    pcosStatus: "PCOS status",
-  }
-
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: "100vh", backgroundColor: "#FAF7F2",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "DM Sans, sans-serif", color: "#6B6560", fontSize: "14px",
-      }}>
-        Loading your profile...
-      </div>
-    )
-  }
-
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#FAF7F2", fontFamily: "DM Sans, sans-serif", paddingBottom: "100px" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#FAF7F2", fontFamily: "DM Sans, sans-serif", paddingBottom: "120px" }}>
 
-      {/* Header */}
       <div style={{ padding: "52px 24px 24px", maxWidth: "480px", margin: "0 auto" }}>
         <h1 className="fade-up-1" style={{
           fontSize: "28px", fontFamily: "Cormorant Garamond, serif",
@@ -228,10 +182,7 @@ function Profile({ userData, onSignOut }) {
             {firstName.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{
-              fontSize: "18px", fontFamily: "Cormorant Garamond, serif",
-              fontWeight: "500", color: "#0D0D0D", marginBottom: "2px",
-            }}>
+            <div style={{ fontSize: "18px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "2px" }}>
               {name}
             </div>
             <div style={{ fontSize: "12px", color: "#6B6560", marginBottom: "8px" }}>
@@ -296,9 +247,7 @@ function Profile({ userData, onSignOut }) {
               <div style={rowLabelStyle}>Current plan</div>
               <div style={rowSubStyle}>Free tier</div>
             </div>
-            <span style={{ fontSize: "12px", color: "#CFC1BA", fontFamily: "DM Sans, sans-serif", fontWeight: "500" }}>
-              Upgrade ✦
-            </span>
+            <span style={{ fontSize: "12px", color: "#CFC1BA", fontFamily: "DM Sans, sans-serif", fontWeight: "500" }}>Upgrade ✦</span>
           </div>
           <div style={lastRowStyle}>
             <div>
@@ -419,11 +368,7 @@ function Profile({ userData, onSignOut }) {
 
         {/* Sign out */}
         <div className="fade-up-10">
-          <button onClick={() => {
-            if (window.confirm("Are you sure you want to sign out?")) {
-              onSignOut && onSignOut()
-            }
-          }} style={{
+          <button onClick={onSignOut} style={{
             width: "100%", backgroundColor: "transparent",
             border: "0.5px solid #E8E4F0", borderRadius: "100px",
             padding: "16px", fontSize: "15px",
@@ -432,7 +377,6 @@ function Profile({ userData, onSignOut }) {
           }}>
             Sign out
           </button>
-
           <div style={{
             textAlign: "center", fontSize: "11px",
             color: "#6B6560", lineHeight: "1.6", padding: "0 20px",
@@ -455,7 +399,6 @@ function Profile({ userData, onSignOut }) {
             maxWidth: "480px", margin: "0 auto",
           }}>
             <div style={{ width: "36px", height: "4px", backgroundColor: "#E8E4F0", borderRadius: "2px", margin: "0 auto 24px" }} />
-
             <div style={{
               fontSize: "20px", fontFamily: "Cormorant Garamond, serif",
               fontWeight: "500", color: "#0D0D0D", marginBottom: "20px",
@@ -463,7 +406,6 @@ function Profile({ userData, onSignOut }) {
               Edit {editLabels[editSheet]}
             </div>
 
-            {/* Text input fields */}
             {(editSheet === "fullName" || editSheet === "city") && (
               <input
                 type="text"
@@ -480,7 +422,6 @@ function Profile({ userData, onSignOut }) {
               />
             )}
 
-            {/* Pill selector fields */}
             {editOptions[editSheet] && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
                 {editOptions[editSheet].map((option) => (
@@ -490,8 +431,7 @@ function Profile({ userData, onSignOut }) {
                     backgroundColor: editValue === option ? "#0D0D0D" : "transparent",
                     color: editValue === option ? "#FAF7F2" : "#6B6560",
                     fontSize: "13px", cursor: "pointer",
-                    fontFamily: "DM Sans, sans-serif",
-                    transition: "all 0.2s ease",
+                    fontFamily: "DM Sans, sans-serif", transition: "all 0.2s ease",
                   }}>
                     {option.replace(/_/g, " ")}
                   </div>
@@ -501,17 +441,17 @@ function Profile({ userData, onSignOut }) {
 
             <div onClick={handleSave} style={{
               backgroundColor: saving ? "#E8E4F0" : "#0D0D0D",
-              color: "#FAF7F2", borderRadius: "100px", padding: "16px",
-              textAlign: "center", cursor: "pointer", fontSize: "15px",
-              fontWeight: "500", fontFamily: "DM Sans, sans-serif",
-              transition: "all 0.3s ease",
+              color: saving ? "#6B6560" : "#FAF7F2",
+              borderRadius: "100px", padding: "16px",
+              textAlign: "center", cursor: "pointer",
+              fontSize: "15px", fontWeight: "500",
+              fontFamily: "DM Sans, sans-serif", transition: "all 0.3s ease",
             }}>
               {saving ? "Saving..." : "Save changes"}
             </div>
           </div>
         </div>
       )}
-
     </div>
   )
 }
