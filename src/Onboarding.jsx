@@ -227,6 +227,8 @@ function Onboarding({ onComplete }) {
               type="date"
               style={inputStyle}
               value={form.dob}
+              max="2010-12-31"
+              min="1990-01-01"
               onChange={(e) => update("dob", e.target.value)}
             />
           </div>
