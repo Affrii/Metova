@@ -153,6 +153,27 @@ function Profile({ userData, onSignOut }) {
         {/* Health profile */}
         <label className="fade-up-3" style={sectionLabelStyle}>Health profile</label>
         <div className="fade-up-4" style={{ ...cardStyle, marginBottom: "20px" }}>
+          <div style={rowStyle} onClick={() => setEditSheet({ field: "fullName", value: name })}>
+            <div>
+              <div style={rowLabelStyle}>Full name</div>
+              <div style={rowSubStyle}>{name}</div>
+            </div>
+            {chevron}
+          </div>
+          <div style={rowStyle} onClick={() => setEditSheet({ field: "city", value: city })}>
+            <div>
+              <div style={rowLabelStyle}>City</div>
+              <div style={rowSubStyle}>{city}</div>
+            </div>
+            {chevron}
+          </div>
+          <div style={rowStyle} onClick={() => setEditSheet({ field: "pcosStatus", value: pcosStatus })}>
+            <div>
+              <div style={rowLabelStyle}>PCOS status</div>
+              <div style={rowSubStyle}>{pcosStatus}</div>
+            </div>
+            {chevron}
+          </div>
           <div style={rowStyle} onClick={() => setEditSheet({ field: "dietType", value: dietType })}>
             <div>
               <div style={rowLabelStyle}>Diet type</div>
@@ -160,28 +181,10 @@ function Profile({ userData, onSignOut }) {
             </div>
             {chevron}
           </div>
-          <div style={rowStyle} onClick={() => setEditSheet({ field: "activityLevel", value: activityLevel })}>
+          <div style={lastRowStyle} onClick={() => setEditSheet({ field: "activityLevel", value: activityLevel })}>
             <div>
               <div style={rowLabelStyle}>Activity level</div>
               <div style={rowSubStyle}>{activityLevel}</div>
-            </div>
-            {chevron}
-          </div>
-          <div style={rowStyle}>
-            <div>
-              <div style={rowLabelStyle}>Current medications</div>
-              <div style={rowSubStyle}>
-                {userData?.medications?.length > 0 ? userData.medications.join(", ") : "None added"}
-              </div>
-            </div>
-            {chevron}
-          </div>
-          <div style={lastRowStyle}>
-            <div>
-              <div style={rowLabelStyle}>Supplements</div>
-              <div style={rowSubStyle}>
-                {userData?.supplements?.length > 0 ? userData.supplements.join(", ") : "None added"}
-              </div>
             </div>
             {chevron}
           </div>
