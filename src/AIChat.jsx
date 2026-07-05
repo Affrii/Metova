@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react"
 
 // Typewriter component — reveals text gradually
-function TypewriterText({ content, onDone, speed = 14 }) {
+function TypewriterText({ content, onDone, speed = 30 }) {
   const [shown, setShown] = useState("")
 
   useEffect(() => {
     let i = 0
     const timer = setInterval(() => {
-      i += 2
+      i += 1
       setShown(content.slice(0, i))
       if (i >= content.length) {
         clearInterval(timer)
