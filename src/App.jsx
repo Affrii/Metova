@@ -152,7 +152,6 @@ function App() {
     onBack={() => setActiveTab("home")}
   />
 )}
-        {activeTab === "track" && <SymptomTracker userData={userData} />}
         {activeTab === "skin" && <SkinScreen userData={userData} />}
         {activeTab === "chat" && <AIChat userData={userData} />}
         {activeTab === "insights" && <Insights userData={userData} />}
@@ -187,7 +186,7 @@ function App() {
         }}>
           {[
             { id: "home", label: "Home", emoji: "⌂" },
-            { id: "track", label: "Track", emoji: "🤍" },
+            { id: "Skin", label: "Skin", emoji: "🤍" },
             { id: "chat", label: "Chat", emoji: "💬" },
             { id: "insights", label: "Insights", emoji: "✦" },
             { id: "profile", label: "Profile", emoji: "○" },
