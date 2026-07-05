@@ -8,6 +8,7 @@ import Insights from "./Insights"
 import Profile from "./Profile"
 import Auth from "./Auth"
 import { supabase } from "./supabase"
+import SkinScreen from "./SkinScreen"
 
 function App() {
   const [screen, setScreen] = useState("splash")
@@ -152,6 +153,7 @@ function App() {
   />
 )}
         {activeTab === "track" && <SymptomTracker userData={userData} />}
+        {activeTab === "skin" && <SkinScreen userData={userData} />}
         {activeTab === "chat" && <AIChat userData={userData} />}
         {activeTab === "insights" && <Insights userData={userData} />}
         {activeTab === "profile" && (
@@ -185,7 +187,7 @@ function App() {
         }}>
           {[
             { id: "home", label: "Home", emoji: "⌂" },
-            { id: "track", label: "Track", emoji: "📊" },
+            { id: "track", label: "Track", emoji: "🤍" },
             { id: "chat", label: "Chat", emoji: "💬" },
             { id: "insights", label: "Insights", emoji: "✦" },
             { id: "profile", label: "Profile", emoji: "○" },
