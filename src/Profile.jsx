@@ -153,14 +153,14 @@ function Profile({ userData, onSignOut }) {
         {/* Health profile */}
         <label className="fade-up-3" style={sectionLabelStyle}>Health profile</label>
         <div className="fade-up-4" style={{ ...cardStyle, marginBottom: "20px" }}>
-          <div style={rowStyle}>
+          <div style={rowStyle} onClick={() => setEditSheet({ field: "dietType", value: dietType })}>
             <div>
               <div style={rowLabelStyle}>Diet type</div>
               <div style={rowSubStyle}>{dietType}</div>
             </div>
             {chevron}
           </div>
-          <div style={rowStyle}>
+          <div style={rowStyle} onClick={() => setEditSheet({ field: "activityLevel", value: activityLevel })}>
             <div>
               <div style={rowLabelStyle}>Activity level</div>
               <div style={rowSubStyle}>{activityLevel}</div>
