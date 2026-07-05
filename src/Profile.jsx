@@ -1,6 +1,8 @@
 import { useState } from "react"
+import EditProfileSheet from "./EditProfileSheet"
 
 function Profile({ userData, onSignOut }) {
+  const [editSheet, setEditSheet] = useState(null)
   const [notificationsOn, setNotificationsOn] = useState(true)
   const [horoscopeOn, setHoroscopeOn] = useState(true)
   const [cycleAlertsOn, setCycleAlertsOn] = useState(true)
@@ -329,11 +331,21 @@ function Profile({ userData, onSignOut }) {
             textAlign: "center", fontSize: "11px",
             color: "#6B6560", lineHeight: "1.6", padding: "0 20px",
           }}>
-            Metova is not a medical device and does not provide medical advice.
+           Metova is not a medical device and does not provide medical advice.
             Always consult your healthcare provider.
           </div>
         </div>
       </div>
+
+      {editSheet && (
+        <EditProfileSheet
+          field={editSheet.field}
+          currentValue={editSheet.value}
+          onClose={() => setEditSheet(null)}
+          onSaved={() => setEditSheet(null)}
+        />
+      )}
+
     </div>
   )
 }
