@@ -185,8 +185,8 @@ function App() {
           zIndex: 50,
         }}>
           {[
-            { id: "home", label: "Home", emoji: "⌂" },
-            { id: "Skin", label: "Skin", emoji: "🤍" },
+            { id: "home",label: "Home", emoji: "⌂" },
+            { id: "skin", label: "Skin", emoji: "🤍" },
             { id: "chat", label: "Chat", emoji: "💬" },
             { id: "insights", label: "Insights", emoji: "✦" },
             { id: "profile", label: "Profile", emoji: "○" },
