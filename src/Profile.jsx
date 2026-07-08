@@ -1,5 +1,6 @@
 import { useState } from "react"
 import EditProfileSheet from "./EditProfileSheet"
+import SupportSheet from "./SupportSheet"
 
 function Profile({ userData, onSignOut }) {
   const [editSheet, setEditSheet] = useState(null)
@@ -8,6 +9,7 @@ function Profile({ userData, onSignOut }) {
   const [cycleAlertsOn, setCycleAlertsOn] = useState(true)
   const [exportLoading, setExportLoading] = useState(false)
   const [exported, setExported] = useState(false)
+  const [showSupport, setShowSupport] = useState(false)
 
   const name = userData?.fullName || "there"
   const firstName = name.split(" ")[0]
@@ -306,6 +308,18 @@ function Profile({ userData, onSignOut }) {
           </div>
         </div>
 
+        {/* Support */}
+<label className="fade-up-10" style={sectionLabelStyle}>Support & feedback</label>
+<div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
+  <div style={lastRowStyle} onClick={() => setShowSupport(true)}>
+    <div>
+      <div style={rowLabelStyle}>Help & feedback</div>
+      <div style={rowSubStyle}>Support, bugs, suggestions</div>
+    </div>
+    {chevron}
+  </div>
+</div>
+
         {/* About */}
         <label className="fade-up-10" style={sectionLabelStyle}>About</label>
         <div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
@@ -339,6 +353,8 @@ function Profile({ userData, onSignOut }) {
           </div>
         </div>
       </div>
+
+      {showSupport && <SupportSheet onClose={() => setShowSupport(false)} />}
 
       {editSheet && (
         <EditProfileSheet
