@@ -7,8 +7,8 @@ import AIChat from "./AIChat"
 import Insights from "./Insights"
 import Profile from "./Profile"
 import Auth from "./Auth"
-import { supabase } from "./supabase"
 import SkinScreen from "./SkinScreen"
+import { supabase } from "./supabase"
 
 function App() {
   const [screen, setScreen] = useState("splash")
@@ -21,13 +21,11 @@ function App() {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setSupabaseUser(session.user)
-
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name, onboarding_completed")
           .eq("id", session.user.id)
           .single()
-
         if (profile?.onboarding_completed) {
           setUserData({ fullName: profile.full_name })
           setScreen("main")
@@ -59,9 +57,7 @@ function App() {
 
   const handleOnboardingComplete = async (data) => {
     setUserData(data)
-
     if (supabaseUser) {
-      // Save to profiles
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -70,14 +66,9 @@ function App() {
           full_name: data.fullName,
           onboarding_completed: true,
         })
-      if (profileError) {
-        console.error("Profile error:", profileError)
-      } else {
-        console.log("Profile saved! ✅")
-      }
+      if (profileError) console.error("Profile error:", profileError)
+      else console.log("Profile saved! ✅")
 
-      // Save to health_profiles
-      // Note: existing_conditions has a typo in DB as "exisiting_conditions"
       const { error: healthError } = await supabase
         .from("health_profiles")
         .upsert({
@@ -89,32 +80,25 @@ function App() {
           pcos_diagnosis_status: data.pcosStatus?.toLowerCase() || null,
           diet_type: data.dietType?.toLowerCase() || null,
           activity_level: data.activityLevel?.toLowerCase() || null,
-          existing_conditions: data.existingConditions || [],
-          family_history: data.familyHistory || [],
-          past_surgeries: data.pastSurgeries || [],
-          cycle_regularity_self_report: data.cycleRegularity || null, 
+          existing_conditions: data.existingConditions?.join(", ") || null,
+          family_history: data.familyHistory?.join(", ") || null,
+          past_surgeries: data.pastSurgeries?.join(", ") || null,
+          cycle_regularity_self_report: data.cycleRegularity || null,
         })
-      if (healthError) {
-        console.error("Health profile error:", healthError)
-      } else {
-        console.log("Health profile saved! ✅")
+      if (healthError) console.error("Health profile error:", healthError)
+      else console.log("Health profile saved! ✅")
+
+      if (data.lastPeriod) {
+        const { error: periodError } = await supabase
+          .from("period_logs")
+          .upsert({
+            user_id: supabaseUser.id,
+            start_date: data.lastPeriod,
+          }, { onConflict: "user_id, start_date" })
+        if (periodError) console.error("Period log error:", periodError)
+        else console.log("Period log saved! ✅")
       }
-
-      // Save to period_logs
-    const { error: periodError } = await supabase
-      .from("period_logs")
-      .upsert({
-         user_id: supabaseUser.id,
-         start_date: data.lastPeriod,
-     }, { onConflict: "user_id, start_date" })
-    
-        if (periodError) {
-          console.error("Period log error:", periodError)
-        } else {
-          console.log("Period log saved! ✅")
-        }
     }
-
     setScreen("main")
   }
 
@@ -140,18 +124,19 @@ function App() {
   if (screen === "main") {
     return (
       <div style={{ position: "relative" }}>
+
         {activeTab === "home" && (
-  <Dashboard 
-    userData={userData} 
-    onCycleTap={() => setActiveTab("cycle")}
-  />
-)}
+          <Dashboard
+            userData={userData}
+            onCycleTap={() => setActiveTab("cycle")}
+          />
+        )}
         {activeTab === "cycle" && (
-  <CycleTracker 
-    userData={userData}
-    onBack={() => setActiveTab("home")}
-  />
-)}
+          <CycleTracker
+            userData={userData}
+            onBack={() => setActiveTab("home")}
+          />
+        )}
         {activeTab === "skin" && <SkinScreen userData={userData} />}
         {activeTab === "chat" && <AIChat userData={userData} />}
         {activeTab === "insights" && <Insights userData={userData} />}
@@ -177,19 +162,19 @@ function App() {
           right: 0,
           backgroundColor: "#FAF7F2",
           borderTop: "0.5px solid #E8E4F0",
-          height: "84px",
+          height: "72px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-around",
-          padding: "0 24px",
-          zIndex: 50,
+          padding: "0 8px",
+          zIndex: 999,
         }}>
           {[
-            { id: "home",label: "Home", emoji: "⌂" },
-            { id: "skin", label: "Skin", emoji: "🤍" },
-            { id: "chat", label: "Chat", emoji: "💬" },
-            { id: "insights", label: "Insights", emoji: "✦" },
-            { id: "profile", label: "Profile", emoji: "○" },
+            { id: "home", icon: "⌂" },
+            { id: "skin", icon: "✿" },
+            { id: "chat", icon: "◉" },
+            { id: "insights", icon: "✦" },
+            { id: "profile", icon: "○" },
           ].map((tab) => (
             <div
               key={tab.id}
@@ -198,25 +183,25 @@ function App() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: "4px",
+                justifyContent: "center",
                 cursor: "pointer",
-                opacity: activeTab === tab.id ? 1 : 0.4,
+                padding: "8px 16px",
+                borderRadius: "16px",
+                backgroundColor: activeTab === tab.id ? "#F2F0ED" : "transparent",
+                transition: "all 0.2s ease",
               }}
             >
-              <div style={{ fontSize: "20px" }}>{tab.emoji}</div>
-              {activeTab === tab.id && (
-                <div style={{
-                  fontSize: "10px",
-                  color: "#0D0D0D",
-                  fontFamily: "DM Sans, sans-serif",
-                  fontWeight: "500",
-                }}>
-                  {tab.label}
-                </div>
-              )}
+              <div style={{
+                fontSize: activeTab === tab.id ? "24px" : "20px",
+                opacity: activeTab === tab.id ? 1 : 0.4,
+                transition: "all 0.2s ease",
+              }}>
+                {tab.icon}
+              </div>
             </div>
           ))}
         </div>
+
       </div>
     )
   }
@@ -251,10 +236,8 @@ function App() {
             height: i === currentSlide ? "8px" : "6px",
             borderRadius: "50%",
             backgroundColor:
-              i === currentSlide
-                ? "#3D3935"
-                : i < currentSlide
-                ? "#D4E4D8"
+              i === currentSlide ? "#3D3935"
+                : i < currentSlide ? "#D4E4D8"
                 : "#E8E4F0",
             transition: "all 0.3s ease",
           }} />
