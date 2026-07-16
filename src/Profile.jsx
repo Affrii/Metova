@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { supabase } from "./supabase"
 import EditProfileSheet from "./EditProfileSheet"
 import SupportSheet from "./SupportSheet"
@@ -12,48 +12,33 @@ function Profile({ userData, onSignOut }) {
   const [exported, setExported] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
   const [healthData, setHealthData] = useState(null)
-const [profileData, setProfileData] = useState(null)
+  const [profileData, setProfileData] = useState(null)
 
-useEffect(() => { fetchProfile() }, [])
+  useEffect(() => { fetchProfile() }, [])
 
-const fetchProfile = async () => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return
-    const { data: profile } = await supabase
-      .from("profiles").select("*")
-      .eq("id", session.user.id).single()
-    const { data: health } = await supabase
-      .from("health_profiles").select("*")
-      .eq("user_id", session.user.id).single()
-    setProfileData(profile)
-    setHealthData(health)
-  } catch (err) {
-    console.error("Error:", err)
+  const fetchProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) return
+      const { data: profile } = await supabase
+        .from("profiles").select("*")
+        .eq("id", session.user.id).single()
+      const { data: health } = await supabase
+        .from("health_profiles").select("*")
+        .eq("user_id", session.user.id).single()
+      setProfileData(profile)
+      setHealthData(health)
+    } catch (err) {
+      console.error("Error:", err)
+    }
   }
-}
-
-  const name = profileData?.full_name || userData?.fullName || "there"
-const firstName = name.split(" ")[0]
-const city = healthData?.city || userData?.city || "Not set"
-const pcosStatus = healthData?.pcos_diagnosis_status || userData?.pcosStatus || "Not set"
-const dietType = healthData?.diet_type || userData?.dietType || "Not set"
-const activityLevel = healthData?.activity_level || userData?.activityLevel || "Not set"
 
   const handleExport = () => {
     setExportLoading(true)
     setTimeout(() => {
       const exportData = {
-        profile: {
-          name: userData?.fullName,
-          dob: userData?.dob,
-          city: userData?.city,
-          pcosStatus: userData?.pcosStatus,
-          dietType: userData?.dietType,
-          activityLevel: userData?.activityLevel,
-          existingConditions: userData?.existingConditions,
-          familyHistory: userData?.familyHistory,
-        },
+        profile: profileData || userData,
+        healthProfile: healthData,
         exportedAt: new Date().toISOString(),
         exportedBy: "Metova Health",
       }
@@ -61,7 +46,7 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `metova-health-data-${firstName.toLowerCase()}.json`
+      a.download = `metova-health-data.json`
       a.click()
       URL.revokeObjectURL(url)
       setExportLoading(false)
@@ -69,6 +54,13 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
       setTimeout(() => setExported(false), 3000)
     }, 1500)
   }
+
+  const name = profileData?.full_name || userData?.fullName || "there"
+  const firstName = name.split(" ")[0]
+  const city = healthData?.city || userData?.city || "Not set"
+  const pcosStatus = healthData?.pcos_diagnosis_status || userData?.pcosStatus || "Not set"
+  const dietType = healthData?.diet_type || userData?.dietType || "Not set"
+  const activityLevel = healthData?.activity_level || userData?.activityLevel || "Not set"
 
   const sectionLabelStyle = {
     fontSize: "11px", fontFamily: "DM Sans, sans-serif",
@@ -121,10 +113,7 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
   )
 
   return (
-    <div style={{
-      minHeight: "100vh", backgroundColor: "#FAF7F2",
-      fontFamily: "DM Sans, sans-serif", paddingBottom: "100px",
-    }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#FAF7F2", fontFamily: "DM Sans, sans-serif", paddingBottom: "100px" }}>
 
       <div style={{ padding: "52px 24px 24px", maxWidth: "480px", margin: "0 auto" }}>
         <h1 className="fade-up-1" style={{
@@ -150,10 +139,7 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
             {firstName.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{
-              fontSize: "18px", fontFamily: "Cormorant Garamond, serif",
-              fontWeight: "500", color: "#0D0D0D", marginBottom: "2px",
-            }}>
+            <div style={{ fontSize: "18px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "2px" }}>
               {name}
             </div>
             <div style={{ fontSize: "12px", color: "#6B6560", marginBottom: "8px" }}>
@@ -169,6 +155,9 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
               ✦ Free plan
             </div>
           </div>
+          <div onClick={() => setEditSheet({ field: "fullName", value: name })} style={{ cursor: "pointer" }}>
+            {chevron}
+          </div>
         </div>
       </div>
 
@@ -177,13 +166,6 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
         {/* Health profile */}
         <label className="fade-up-3" style={sectionLabelStyle}>Health profile</label>
         <div className="fade-up-4" style={{ ...cardStyle, marginBottom: "20px" }}>
-          <div style={rowStyle} onClick={() => setEditSheet({ field: "fullName", value: name })}>
-            <div>
-              <div style={rowLabelStyle}>Full name</div>
-              <div style={rowSubStyle}>{name}</div>
-            </div>
-            {chevron}
-          </div>
           <div style={rowStyle} onClick={() => setEditSheet({ field: "city", value: city })}>
             <div>
               <div style={rowLabelStyle}>City</div>
@@ -222,9 +204,7 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
               <div style={rowLabelStyle}>Current plan</div>
               <div style={rowSubStyle}>Free tier</div>
             </div>
-            <span style={{ fontSize: "12px", color: "#CFC1BA", fontFamily: "DM Sans, sans-serif", fontWeight: "500" }}>
-              Upgrade ✦
-            </span>
+            <span style={{ fontSize: "12px", color: "#CFC1BA", fontFamily: "DM Sans, sans-serif", fontWeight: "500" }}>Upgrade ✦</span>
           </div>
           <div style={lastRowStyle}>
             <div>
@@ -294,6 +274,18 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
           ))}
         </div>
 
+        {/* Support & Feedback */}
+        <label className="fade-up-10" style={sectionLabelStyle}>Support & feedback</label>
+        <div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
+          <div style={lastRowStyle} onClick={() => setShowSupport(true)}>
+            <div>
+              <div style={rowLabelStyle}>Help & feedback</div>
+              <div style={rowSubStyle}>Support, bugs, suggestions</div>
+            </div>
+            {chevron}
+          </div>
+        </div>
+
         {/* Data & privacy */}
         <label className="fade-up-10" style={sectionLabelStyle}>Data & privacy</label>
         <div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
@@ -330,18 +322,6 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
           </div>
         </div>
 
-        {/* Support */}
-<label className="fade-up-10" style={sectionLabelStyle}>Support & feedback</label>
-<div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
-  <div style={lastRowStyle} onClick={() => setShowSupport(true)}>
-    <div>
-      <div style={rowLabelStyle}>Help & feedback</div>
-      <div style={rowSubStyle}>Support, bugs, suggestions</div>
-    </div>
-    {chevron}
-  </div>
-</div>
-
         {/* About */}
         <label className="fade-up-10" style={sectionLabelStyle}>About</label>
         <div className="fade-up-10" style={{ ...cardStyle, marginBottom: "20px" }}>
@@ -370,7 +350,7 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
             textAlign: "center", fontSize: "11px",
             color: "#6B6560", lineHeight: "1.6", padding: "0 20px",
           }}>
-           Metova is not a medical device and does not provide medical advice.
+            Metova is not a medical device and does not provide medical advice.
             Always consult your healthcare provider.
           </div>
         </div>
@@ -378,18 +358,18 @@ const activityLevel = healthData?.activity_level || userData?.activityLevel || "
 
       {showSupport && <SupportSheet onClose={() => setShowSupport(false)} />}
 
-      
-        {editSheet && (
-  <EditProfileSheet
-    field={editSheet.field}
-    currentValue={editSheet.value}
-    onClose={() => setEditSheet(null)}
-    onSaved={() => {
-      setEditSheet(null)
-      fetchProfile()
-    }}
-  />
-)}
+      {editSheet && (
+        <EditProfileSheet
+          field={editSheet.field}
+          currentValue={editSheet.value}
+          onClose={() => setEditSheet(null)}
+          onSaved={() => {
+            setEditSheet(null)
+            fetchProfile()
+          }}
+        />
+      )}
+
     </div>
   )
 }
