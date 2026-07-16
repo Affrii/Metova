@@ -31,6 +31,7 @@ function EditProfileSheet({ field, currentValue, onClose, onSaved }) {
     pcosStatus: "PCOS status",
   }
 const handleSave = async () => {
+    console.log("Save clicked! Field:", field, "Value:", value)
     setSaving(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()

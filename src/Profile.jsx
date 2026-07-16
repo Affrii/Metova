@@ -356,15 +356,18 @@ function Profile({ userData, onSignOut }) {
 
       {showSupport && <SupportSheet onClose={() => setShowSupport(false)} />}
 
-      {editSheet && (
-        <EditProfileSheet
-          field={editSheet.field}
-          currentValue={editSheet.value}
-          onClose={() => setEditSheet(null)}
-          onSaved={() => setEditSheet(null)}
-        />
-      )}
-
+      
+        {editSheet && (
+  <EditProfileSheet
+    field={editSheet.field}
+    currentValue={editSheet.value}
+    onClose={() => setEditSheet(null)}
+    onSaved={() => {
+      setEditSheet(null)
+      fetchProfile()
+    }}
+  />
+)}
     </div>
   )
 }
