@@ -30,17 +30,19 @@ function EditProfileSheet({ field, currentValue, onClose, onSaved }) {
     activityLevel: "Activity level",
     pcosStatus: "PCOS status",
   }
-
-  const handleSave = async () => {
+const handleSave = async () => {
     setSaving(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) return
 
       if (field === "fullName") {
-        await supabase.from("profiles")
+        const { error } = await supabase
+          .from("profiles")
           .update({ full_name: value })
           .eq("id", session.user.id)
+        if (error) console.error("Name save error:", error)
+        else console.log("Name saved! ✅")
       } else {
         const fieldMap = {
           city: "city",
@@ -48,9 +50,14 @@ function EditProfileSheet({ field, currentValue, onClose, onSaved }) {
           activityLevel: "activity_level",
           pcosStatus: "pcos_diagnosis_status",
         }
-        await supabase.from("health_profiles")
-          .update({ [fieldMap[field]]: field === "city" ? value : value.toLowerCase() })
-          .eq("user_id", session.user.id)
+        const { error } = await supabase
+          .from("health_profiles")
+          .upsert({
+            user_id: session.user.id,
+            [fieldMap[field]]: field === "city" ? value : value.toLowerCase(),
+          }, { onConflict: "user_id" })
+        if (error) console.error("Health profile save error:", error)
+        else console.log("Health profile saved! ✅")
       }
 
       onSaved()
