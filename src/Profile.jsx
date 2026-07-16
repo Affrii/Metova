@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { supabase } from "./supabase"
 import EditProfileSheet from "./EditProfileSheet"
 import SupportSheet from "./SupportSheet"
 
@@ -10,13 +11,34 @@ function Profile({ userData, onSignOut }) {
   const [exportLoading, setExportLoading] = useState(false)
   const [exported, setExported] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
+  const [healthData, setHealthData] = useState(null)
+const [profileData, setProfileData] = useState(null)
 
-  const name = userData?.fullName || "there"
-  const firstName = name.split(" ")[0]
-  const city = userData?.city || "India"
-  const pcosStatus = userData?.pcosStatus || "exploring"
-  const dietType = userData?.dietType || "not set"
-  const activityLevel = userData?.activityLevel || "not set"
+useEffect(() => { fetchProfile() }, [])
+
+const fetchProfile = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return
+    const { data: profile } = await supabase
+      .from("profiles").select("*")
+      .eq("id", session.user.id).single()
+    const { data: health } = await supabase
+      .from("health_profiles").select("*")
+      .eq("user_id", session.user.id).single()
+    setProfileData(profile)
+    setHealthData(health)
+  } catch (err) {
+    console.error("Error:", err)
+  }
+}
+
+  const name = profileData?.full_name || userData?.fullName || "there"
+const firstName = name.split(" ")[0]
+const city = healthData?.city || userData?.city || "Not set"
+const pcosStatus = healthData?.pcos_diagnosis_status || userData?.pcosStatus || "Not set"
+const dietType = healthData?.diet_type || userData?.dietType || "Not set"
+const activityLevel = healthData?.activity_level || userData?.activityLevel || "Not set"
 
   const handleExport = () => {
     setExportLoading(true)
