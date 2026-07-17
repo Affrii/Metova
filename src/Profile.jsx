@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { supabase } from "./supabase"
 import EditProfileSheet from "./EditProfileSheet"
 import SupportSheet from "./SupportSheet"
+import AvatarUpload from "./AvatarUpload"
 
 function Profile({ userData, onSignOut }) {
   const [editSheet, setEditSheet] = useState(null)
@@ -13,6 +14,7 @@ function Profile({ userData, onSignOut }) {
   const [showSupport, setShowSupport] = useState(false)
   const [healthData, setHealthData] = useState(null)
   const [profileData, setProfileData] = useState(null)
+  const [avatarUrl, setAvatarUrl] = useState(null)
 
   useEffect(() => { fetchProfile() }, [])
 
@@ -27,6 +29,7 @@ function Profile({ userData, onSignOut }) {
         .from("health_profiles").select("*")
         .eq("user_id", session.user.id).single()
       setProfileData(profile)
+      setAvatarUrl(profile?.avatar_url || null)
       setHealthData(health)
     } catch (err) {
       console.error("Error:", err)
@@ -129,15 +132,12 @@ function Profile({ userData, onSignOut }) {
           borderRadius: "20px", padding: "24px", marginBottom: "24px",
           display: "flex", alignItems: "center", gap: "16px",
         }}>
-          <div style={{
-            width: "56px", height: "56px", borderRadius: "50%",
-            backgroundColor: "#E8E4F0", display: "flex",
-            alignItems: "center", justifyContent: "center",
-            fontSize: "22px", fontFamily: "Cormorant Garamond, serif",
-            color: "#3D3935", flexShrink: 0,
-          }}>
-            {firstName.charAt(0).toUpperCase()}
-          </div>
+          <AvatarUpload
+  userId={profileData?.id}
+  currentAvatar={avatarUrl}
+  firstName={firstName}
+  onUploaded={(url) => setAvatarUrl(url)}
+/>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: "18px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", marginBottom: "2px" }}>
               {name}
