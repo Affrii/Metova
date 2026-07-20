@@ -15,6 +15,12 @@ function App() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [userData, setUserData] = useState(null)
   const [activeTab, setActiveTab] = useState("home")
+  const switchTab = (id) => {
+  setActiveTab(id)
+  window.scrollTo({ top: 0, behavior: "instant" })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
   const [supabaseUser, setSupabaseUser] = useState(null)
 
   useEffect(() => {
@@ -178,7 +184,7 @@ function App() {
           ].map((tab) => (
             <div
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => switchTab(tab.id)}
               style={{
                 display: "flex",
                 flexDirection: "column",
