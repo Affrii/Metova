@@ -21,9 +21,11 @@ function Onboarding({ onComplete }) {
   })
 
   const goToStep = (n) => {
-    setStep(n)
-    window.scrollTo(0, 0)
-  }
+  setStep(n)
+  window.scrollTo({ top: 0, behavior: "instant" })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
 
   const update = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
