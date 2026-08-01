@@ -1,6 +1,17 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 function SkinScreen({ userData }) {
+  const [ready, setReady] = useState(false) 
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!ready) return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#FAF7F2" }} />
+  )
+
   const [checkedItems, setCheckedItems] = useState({})
   const [acneZones, setAcneZones] = useState({
     forehead: false,

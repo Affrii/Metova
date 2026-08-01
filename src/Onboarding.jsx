@@ -29,14 +29,19 @@ function Onboarding({ onComplete }) {
 
   const update = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-  const toggleArray = (field, value) => {
-    setForm(f => ({
-      ...f,
-      [field]: f[field].includes(value)
-        ? f[field].filter(v => v !== value)
-        : [...f[field], value],
-    }))
-  }
+   const toggleArray = (field, value) => {
+  setForm(f => {
+    const current = f[field]
+    if (value === "None") {
+      return { ...f, [field]: current.includes("None") ? [] : ["None"] }
+    }
+    const withoutNone = current.filter(v => v !== "None")
+    if (withoutNone.includes(value)) {
+      return { ...f, [field]: withoutNone.filter(v => v !== value) }
+    }
+    return { ...f, [field]: [...withoutNone, value] }
+  })
+}
 
   const bmi = form.heightCm && form.weightKg
     ? (parseFloat(form.weightKg) / ((parseFloat(form.heightCm) / 100) ** 2)).toFixed(1)
