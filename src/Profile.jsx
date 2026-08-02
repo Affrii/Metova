@@ -3,6 +3,7 @@ import { supabase } from "./supabase"
 import EditProfileSheet from "./EditProfileSheet"
 import SupportSheet from "./SupportSheet"
 import AvatarUpload from "./AvatarUpload"
+import PrivacyPolicy from "./PrivacyPolicy"
 
 function Profile({ userData, onSignOut }) {
   const [editSheet, setEditSheet] = useState(null)
@@ -15,6 +16,7 @@ function Profile({ userData, onSignOut }) {
   const [healthData, setHealthData] = useState(null)
   const [profileData, setProfileData] = useState(null)
   const [avatarUrl, setAvatarUrl] = useState(null)
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   useEffect(() => { fetchProfile() }, [])
 
@@ -306,13 +308,14 @@ function Profile({ userData, onSignOut }) {
               {exportLoading ? "Preparing..." : exported ? "Downloaded ✓" : "Export"}
             </button>
           </div>
-          <div style={rowStyle}>
-            <div>
-              <div style={rowLabelStyle}>Privacy policy</div>
-              <div style={rowSubStyle}>How we protect your data</div>
-            </div>
-            {chevron}
-          </div>
+          <div style={rowStyle} onClick={() => setShowPrivacy(true)}>
+  <div>
+    <div style={rowLabelStyle}>Privacy policy</div>
+    <div style={rowSubStyle}>How we protect your data</div>
+  </div>
+  {chevron}
+  {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+</div>
           <div style={lastRowStyle}>
             <div>
               <div style={rowLabelStyle}>Delete my account</div>
