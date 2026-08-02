@@ -17,13 +17,18 @@ function TypewriterText({ content, onDone, speed = 30 }) {
     }, speed)
     return () => clearInterval(timer)
   }, [content])
-
-  return shown.split("\n").map((line, i) => (
-    <span key={i}>
-      {line}
-      {i < shown.split("\n").length - 1 && <br />}
-    </span>
-  ))
+const cleaned = shown
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/#{1,6}\s/g, "")
+      .replace(/`(.*?)`/g, "$1")
+    
+    return cleaned.split("\n").map((line, i, arr) => (
+      <span key={i}>
+        {line}
+        {i < arr.length - 1 && <br />}
+      </span>
+    ))
 }
 
 function AIChat({ userData }) {
@@ -196,13 +201,20 @@ function AIChat({ userData }) {
     "Is this supplement right?",
   ]
 
-  const formatStatic = (content) =>
-    content.split("\n").map((line, i) => (
+  const formatStatic = (content) => {
+    const cleaned = content
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/#{1,6}\s/g, "")
+      .replace(/`(.*?)`/g, "$1")
+    
+    return cleaned.split("\n").map((line, i, arr) => (
       <span key={i}>
         {line}
-        {i < content.split("\n").length - 1 && <br />}
+        {i < arr.length - 1 && <br />}
       </span>
     ))
+  }
 
   return (
     <div style={{
