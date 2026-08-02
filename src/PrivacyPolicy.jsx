@@ -13,12 +13,17 @@ function PrivacyPolicy({ onClose }) {
         overflowY: "auto",
         fontFamily: "DM Sans, sans-serif",
       }}>
-        {/* Drag handle */}
-        <div style={{
-          width: "36px", height: "4px",
-          backgroundColor: "#E8E4F0", borderRadius: "2px",
-          margin: "16px auto 0",
-        }} />
+        {/* Close bar - tap to close */}
+<div onClick={onClose} style={{
+  width: "100%", padding: "16px 0 8px",
+  display: "flex", justifyContent: "center",
+  cursor: "pointer",
+}}>
+  <div style={{
+    width: "36px", height: "4px",
+    backgroundColor: "#E8E4F0", borderRadius: "2px",
+  }} />
+</div>
 
         {/* Content */}
         <div style={{ padding: "24px 24px 48px", maxWidth: "480px", margin: "0 auto" }}>
