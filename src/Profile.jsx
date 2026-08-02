@@ -323,7 +323,7 @@ function Profile({ userData, onSignOut }) {
     <div style={rowLabelStyle}>Delete my account</div>
     <div style={rowSubStyle}>Permanently remove all data</div>
   </div>
- <span style={{ fontSize: "12px", color: "#E05A6A", fontFamily: "DM Sans, sans-serif" }}>Delete</span>
+ <span style={{ fontSize: "12px", color: "#C0392B", fontWeight: "500", fontFamily: "DM Sans, sans-serif" }}>Delete</span>
 </div>
         </div>
 
