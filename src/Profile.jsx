@@ -4,6 +4,7 @@ import EditProfileSheet from "./EditProfileSheet"
 import SupportSheet from "./SupportSheet"
 import AvatarUpload from "./AvatarUpload"
 import PrivacyPolicy from "./PrivacyPolicy"
+import DeleteAccountSheet from "./DeleteAccountSheet"
 
 function Profile({ userData, onSignOut }) {
   const [editSheet, setEditSheet] = useState(null)
@@ -17,6 +18,7 @@ function Profile({ userData, onSignOut }) {
   const [profileData, setProfileData] = useState(null)
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [showPrivacy, setShowPrivacy] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
 
   useEffect(() => { fetchProfile() }, [])
 
@@ -316,13 +318,13 @@ function Profile({ userData, onSignOut }) {
   {chevron}
   {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
 </div>
-          <div style={lastRowStyle}>
-            <div>
-              <div style={rowLabelStyle}>Delete my account</div>
-              <div style={rowSubStyle}>Permanently remove all data</div>
-            </div>
-            <span style={{ fontSize: "12px", color: "#F2C4CE", fontFamily: "DM Sans, sans-serif" }}>Delete</span>
-          </div>
+          <div style={lastRowStyle} onClick={() => setShowDelete(true)}>
+  <div>
+    <div style={rowLabelStyle}>Delete my account</div>
+    <div style={rowSubStyle}>Permanently remove all data</div>
+  </div>
+  <span style={{ fontSize: "12px", color: "#F2C4CE", fontFamily: "DM Sans, sans-serif" }}>Delete</span>
+</div>
         </div>
 
         {/* About */}
@@ -360,6 +362,18 @@ function Profile({ userData, onSignOut }) {
       </div>
 
       {showSupport && <SupportSheet onClose={() => setShowSupport(false)} />}
+        
+         {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+
+      {showDelete && (
+        <DeleteAccountSheet
+          onClose={() => setShowDelete(false)}
+          onDeleted={() => {
+            setShowDelete(false)
+            onSignOut()
+          }}
+        />
+      )}
 
       {editSheet && (
         <EditProfileSheet
