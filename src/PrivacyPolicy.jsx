@@ -1,32 +1,35 @@
 function PrivacyPolicy({ onClose }) {
   return (
-    <div onClick={onClose} style={{
+    <div style={{
       position: "fixed", inset: 0,
       backgroundColor: "rgba(0,0,0,0.3)",
       zIndex: 200,
       display: "flex", alignItems: "flex-end",
     }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
+      <div style={{
         width: "100%", maxHeight: "90vh",
         backgroundColor: "#FAF7F2",
         borderRadius: "24px 24px 0 0",
         overflowY: "auto",
         fontFamily: "DM Sans, sans-serif",
       }}>
-        {/* Close bar - tap to close */}
-<div onClick={onClose} style={{
-  width: "100%", padding: "16px 0 8px",
-  display: "flex", justifyContent: "center",
-  cursor: "pointer",
-}}>
-  <div style={{
-    width: "36px", height: "4px",
-    backgroundColor: "#E8E4F0", borderRadius: "2px",
-  }} />
-</div>
+
+        {/* Close bar */}
+        <div onClick={onClose} style={{
+          width: "100%", padding: "16px 0 8px",
+          display: "flex", justifyContent: "center",
+          cursor: "pointer", position: "sticky",
+          top: 0, backgroundColor: "#FAF7F2",
+          zIndex: 10,
+        }}>
+          <div style={{
+            width: "36px", height: "4px",
+            backgroundColor: "#CFC1BA", borderRadius: "2px",
+          }} />
+        </div>
 
         {/* Content */}
-        <div style={{ padding: "24px 24px 48px", maxWidth: "480px", margin: "0 auto" }}>
+        <div style={{ padding: "8px 24px 48px", maxWidth: "480px", margin: "0 auto" }}>
 
           <h1 style={{
             fontSize: "24px",
