@@ -332,7 +332,7 @@ function AIChat({ userData }) {
                 maxWidth: "80%",
                 padding: "12px 16px",
                 borderRadius: "18px 18px 4px 18px",
-                backgroundColor: "#F2C4CE",
+                backgroundColor: "#FDF0EC",
                 fontSize: "14px",
                 color: "#0D0D0D",
                 lineHeight: "1.6",
