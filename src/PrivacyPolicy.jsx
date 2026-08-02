@@ -1,4 +1,13 @@
+import { useRef, useEffect } from "react"
 function PrivacyPolicy({ onClose }) {
+     const scrollRef = useRef(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0
+    }
+  }, [])
+
   return (
     <div style={{
       position: "fixed", inset: 0,
@@ -6,7 +15,7 @@ function PrivacyPolicy({ onClose }) {
       zIndex: 200,
       display: "flex", alignItems: "flex-end",
     }}>
-      <div style={{
+      <div ref={scrollRef} style={{
         width: "100%", height: "90vh",
         backgroundColor: "#FAF7F2",
         borderRadius: "24px 24px 0 0",
