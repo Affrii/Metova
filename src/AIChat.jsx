@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from "react"
 import { supabase } from "./supabase"
 
 // Typewriter component — reveals text gradually
-function TypewriterText({ content, onDone, speed = 30 }) {
+function TypewriterText({ content, onDone, speed = 18 }) {
   const [shown, setShown] = useState("")
 
   useEffect(() => {
     let i = 0
     const timer = setInterval(() => {
-      i += 1
+      i += 2
       setShown(content.slice(0, i))
       if (i >= content.length) {
         clearInterval(timer)
