@@ -22,13 +22,10 @@ const cleaned = shown
       .replace(/\*(.*?)\*/g, "$1")
       .replace(/#{1,6}\s/g, "")
       .replace(/`(.*?)`/g, "$1")
+      .replace(/\n+/g, " ")
+      .trim()
     
-    return cleaned.split("\n").map((line, i, arr) => (
-      <span key={i}>
-        {line}
-        {i < arr.length - 1 && <br />}
-      </span>
-    ))
+    return <span>{cleaned}</span>
 }
 
 function AIChat({ userData }) {
@@ -207,13 +204,10 @@ function AIChat({ userData }) {
       .replace(/\*(.*?)\*/g, "$1")
       .replace(/#{1,6}\s/g, "")
       .replace(/`(.*?)`/g, "$1")
+      .replace(/\n+/g, " ")
+      .trim()
     
-    return cleaned.split("\n").map((line, i, arr) => (
-      <span key={i}>
-        {line}
-        {i < arr.length - 1 && <br />}
-      </span>
-    ))
+    return <span>{cleaned}</span>
   }
 
   return (

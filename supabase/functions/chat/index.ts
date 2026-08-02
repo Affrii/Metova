@@ -81,7 +81,10 @@ Guidelines:
 - NEVER use markdown formatting like bold, asterisks, hashtags or bullet symbols
 - Write in plain conversational text only
 - Use plain numbers for lists if needed
-- You can use emojis occasionally to feel warm and personal, but don't overdo it`
+- You can use emojis occasionally to feel warm and personal, but don't overdo it
+- Write in flowing paragraphs, NOT line by line like a poem
+- Each thought should connect naturally to the next
+- Avoid excessive line breaks — write like you are texting a close friend`
 
     // Call Anthropic API
 
