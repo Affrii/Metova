@@ -1,11 +1,4 @@
-import { useEffect } from "react"
-
 function PrivacyPolicy({ onClose }) {
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
   return (
     <div style={{
       position: "fixed", inset: 0,
@@ -13,6 +6,7 @@ function PrivacyPolicy({ onClose }) {
       zIndex: 200, overflowY: "auto",
       fontFamily: "DM Sans, sans-serif",
     }}>
+
       {/* Header */}
       <div style={{
         position: "sticky", top: 0,
@@ -21,6 +15,7 @@ function PrivacyPolicy({ onClose }) {
         padding: "52px 24px 16px",
         display: "flex", alignItems: "center",
         justifyContent: "space-between",
+        zIndex: 10,
       }}>
         <h1 style={{
           fontSize: "24px",
@@ -30,11 +25,12 @@ function PrivacyPolicy({ onClose }) {
           Privacy Policy
         </h1>
         <div onClick={onClose} style={{
-          fontSize: "13px", color: "#6B6560",
-          fontFamily: "DM Sans, sans-serif",
-          cursor: "pointer", padding: "8px",
+          width: "36px", height: "36px", borderRadius: "50%",
+          backgroundColor: "#FDF0EC", border: "0.5px solid #E8E4F0",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", fontSize: "18px", color: "#6B6560",
         }}>
-          Close
+          ×
         </div>
       </div>
 
@@ -109,23 +105,13 @@ function PrivacyPolicy({ onClose }) {
           backgroundColor: "#FDF0EC",
           border: "0.5px solid #E8E4F0",
           borderRadius: "16px", padding: "16px 20px",
-          marginTop: "16px", marginBottom: "24px",
+          marginTop: "16px",
         }}>
           <div style={{ fontSize: "13px", color: "#6B6560", lineHeight: "1.6" }}>
             Metova is not a medical device and does not provide medical advice.
             Always consult your healthcare provider for medical decisions.
           </div>
         </div>
-
-        <button onClick={onClose} style={{
-          width: "100%", backgroundColor: "#0D0D0D",
-          color: "#FAF7F2", border: "none",
-          borderRadius: "100px", padding: "16px",
-          fontSize: "15px", fontFamily: "DM Sans, sans-serif",
-          fontWeight: "500", cursor: "pointer",
-        }}>
-          Close
-        </button>
 
       </div>
     </div>
