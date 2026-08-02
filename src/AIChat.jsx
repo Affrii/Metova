@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import { supabase } from "./supabase"
 
 // Typewriter component — reveals text gradually
 function TypewriterText({ content, onDone, speed = 30 }) {
@@ -113,7 +114,7 @@ function AIChat({ userData }) {
     return `Thank you for sharing that with me, ${name} 🤍\n\nI want to make sure I give you the most helpful response — could you tell me a little more about what you're experiencing? The more specific you are, the better I can connect what you're feeling to what might actually be happening hormonally.\n\nI'm here and I'm listening.`
   }
 
-  const sendMessage = (text) => {
+  const sendMessage = async (text) => {
     if (!text.trim()) return
 
     const userMessage = {
@@ -131,11 +132,30 @@ function AIChat({ userData }) {
     setInput("")
     setIsTyping(true)
 
-    setTimeout(() => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      const response = await fetch(
+        "https://azbyrompqrpigtraeggo.supabase.co/functions/v1/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            message: text.trim(),
+            userId: session?.user?.id,
+          }),
+        }
+      )
+
+      const data = await response.json()
+
       const aiResponse = {
         id: Date.now() + 1,
         role: "assistant",
-        content: generateResponse(text.trim()),
+        content: data.response || "I'm here for you. Could you tell me more?",
         animate: true,
         time: new Date().toLocaleTimeString("en-IN", {
           hour: "2-digit",
@@ -144,7 +164,21 @@ function AIChat({ userData }) {
       }
       setIsTyping(false)
       setMessages((prev) => [...prev, aiResponse])
-    }, 1500 + Math.random() * 1000)
+
+    } catch (error) {
+      console.error("Chat error:", error)
+      setIsTyping(false)
+      setMessages((prev) => [...prev, {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: "I'm having trouble connecting right now. Please try again in a moment 🤍",
+        animate: true,
+        time: new Date().toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }])
+    }
   }
 
   const handleKeyPress = (e) => {
