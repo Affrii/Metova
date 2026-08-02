@@ -7,7 +7,7 @@ function PrivacyPolicy({ onClose }) {
       display: "flex", alignItems: "flex-end",
     }}>
       <div style={{
-        width: "100%", maxHeight: "90vh",
+        width: "100%", height: "90vh",
         backgroundColor: "#FAF7F2",
         borderRadius: "24px 24px 0 0",
         overflowY: "auto",
