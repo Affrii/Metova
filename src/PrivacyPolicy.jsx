@@ -24,7 +24,7 @@ function PrivacyPolicy({ onClose }) {
         }}>
           Privacy Policy
         </h1>
-        <div onClick={onClose} style={{
+        <div onClick={(e) => { e.stopPropagation(); onClose(); }} style={{
           width: "36px", height: "36px", borderRadius: "50%",
           backgroundColor: "#FDF0EC", border: "0.5px solid #E8E4F0",
           display: "flex", alignItems: "center", justifyContent: "center",
