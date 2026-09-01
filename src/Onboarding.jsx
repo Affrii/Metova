@@ -2,6 +2,7 @@ import { useState } from "react"
 
 function Onboarding({ onComplete }) {
   const [step, setStep] = useState(1)
+  const [error, setError] = useState("")
   const [form, setForm] = useState({
     fullName: "",
     dob: "",
@@ -22,6 +23,7 @@ function Onboarding({ onComplete }) {
 
   const goToStep = (n) => {
     setStep(n)
+    setError("")
     window.scrollTo({ top: 0, behavior: "instant" })
     document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
@@ -195,8 +197,41 @@ function Onboarding({ onComplete }) {
         </div>
       </div>
 
+      {error && (
+        <div style={{
+          backgroundColor: "#FDE8E8",
+          border: "0.5px solid #F2C4C4",
+          borderRadius: "12px",
+          padding: "12px 16px",
+          marginBottom: "12px",
+          fontSize: "13px",
+          color: "#8A3A3A",
+        }}>
+          {error}
+        </div>
+      )}
+
       <div className="fade-up-9">
-        <button onClick={() => goToStep(2)} style={continueBtn}>Continue →</button>
+        <button
+          onClick={() => {
+            if (!form.fullName) {
+              setError("Please enter your name to continue 🌸")
+              return
+            }
+            if (!form.dob) {
+              setError("Please enter your date of birth to continue 🌸")
+              return
+            }
+            if (!form.city) {
+              setError("Please enter your city to continue 🌸")
+              return
+            }
+            goToStep(2)
+          }}
+          style={continueBtn}
+        >
+          Continue →
+        </button>
       </div>
     </div>
   )
