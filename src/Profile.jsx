@@ -65,9 +65,9 @@ function Profile({ userData, onSignOut }) {
   const name = profileData?.full_name || userData?.fullName || "there"
   const firstName = name.split(" ")[0]
   const city = healthData?.city || userData?.city || "Not set"
-  const pcosStatus = healthData?.pcos_diagnosis_status || userData?.pcosStatus || "Not set"
-  const dietType = healthData?.diet_type || userData?.dietType || "Not set"
-  const activityLevel = healthData?.activity_level || userData?.activityLevel || "Not set"
+  const pcosStatus = (healthData?.pcos_diagnosis_status || userData?.pcosStatus || "Not set").replace(/_/g, " ")
+  const dietType = (healthData?.diet_type || userData?.dietType || "Not set").replace(/_/g, " ")
+  const activityLevel = (healthData?.activity_level || userData?.activityLevel || "Not set").replace(/_/g, " ")
 
   const sectionLabelStyle = {
     fontSize: "11px", fontFamily: "DM Sans, sans-serif",
