@@ -21,27 +21,27 @@ function Onboarding({ onComplete }) {
   })
 
   const goToStep = (n) => {
-  setStep(n)
-  window.scrollTo({ top: 0, behavior: "instant" })
-  document.documentElement.scrollTop = 0
-  document.body.scrollTop = 0
-}
+    setStep(n)
+    window.scrollTo({ top: 0, behavior: "instant" })
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }
 
   const update = (field, value) => setForm(f => ({ ...f, [field]: value }))
 
-   const toggleArray = (field, value) => {
-  setForm(f => {
-    const current = f[field]
-    if (value === "None") {
-      return { ...f, [field]: current.includes("None") ? [] : ["None"] }
-    }
-    const withoutNone = current.filter(v => v !== "None")
-    if (withoutNone.includes(value)) {
-      return { ...f, [field]: withoutNone.filter(v => v !== value) }
-    }
-    return { ...f, [field]: [...withoutNone, value] }
-  })
-}
+  const toggleArray = (field, value) => {
+    setForm(f => {
+      const current = f[field]
+      if (value === "None") {
+        return { ...f, [field]: current.includes("None") ? [] : ["None"] }
+      }
+      const withoutNone = current.filter(v => v !== "None")
+      if (withoutNone.includes(value)) {
+        return { ...f, [field]: withoutNone.filter(v => v !== value) }
+      }
+      return { ...f, [field]: [...withoutNone, value] }
+    })
+  }
 
   const bmi = form.heightCm && form.weightKg
     ? (parseFloat(form.weightKg) / ((parseFloat(form.heightCm) / 100) ** 2)).toFixed(1)
@@ -129,7 +129,7 @@ function Onboarding({ onComplete }) {
   if (step === 1) return (
     <div style={wrap}>
       <div className="fade-up-1" style={{ marginBottom: "32px" }}>
-        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 1 of 5</div>
+        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 1 of 4</div>
         <h1 style={{ fontSize: "28px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", margin: "0 0 8px" }}>
           Let's meet you
         </h1>
@@ -230,7 +230,7 @@ function Onboarding({ onComplete }) {
   if (step === 3) return (
     <div style={wrap}>
       <div className="fade-up-1" style={{ marginBottom: "32px" }}>
-        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 3 of 5</div>
+        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 3 of 4</div>
         <h1 style={{ fontSize: "28px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", margin: "0 0 8px" }}>
           Your health story
         </h1>
@@ -286,7 +286,7 @@ function Onboarding({ onComplete }) {
   if (step === 4) return (
     <div style={wrap}>
       <div className="fade-up-1" style={{ marginBottom: "32px" }}>
-        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 4 of 5</div>
+        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 4 of 4</div>
         <h1 style={{ fontSize: "28px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", margin: "0 0 8px" }}>
           Your lifestyle
         </h1>
@@ -332,88 +332,8 @@ function Onboarding({ onComplete }) {
       </div>
 
       <div className="fade-up-6">
-        <button onClick={() => goToStep(5)} style={continueBtn}>Continue →</button>
-        <button onClick={() => goToStep(5)} style={skipBtn}>Skip</button>
-      </div>
-    </div>
-  )
-
-  // STEP 5 — Pricing
-  if (step === 5) return (
-    <div style={wrap}>
-      <div className="fade-up-1" style={{ marginBottom: "32px" }}>
-        <div style={{ fontSize: "11px", color: "#6B6560", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>Step 5 of 5</div>
-        <h1 style={{ fontSize: "28px", fontFamily: "Cormorant Garamond, serif", fontWeight: "500", color: "#0D0D0D", margin: "0 0 8px" }}>
-          Choose your plan
-        </h1>
-        <p style={{ fontSize: "13px", color: "#6B6560", margin: "0" }}>
-          Start free, upgrade when you're ready
-        </p>
-      </div>
-
-      {[
-        {
-          name: "Free",
-          price: "₹0",
-          period: "forever",
-          features: ["Basic cycle tracking", "5 AI chats/month", "Skin phase guide", "Community access"],
-          featured: false,
-        },
-        {
-          name: "Core",
-          price: "₹299",
-          period: "per month",
-          features: ["Unlimited AI companion", "Full cycle intelligence", "Skin + food insights", "Hormone Horoscope", "Symptom tracking"],
-          featured: true,
-        },
-        {
-          name: "Clinical",
-          price: "₹999",
-          period: "per month",
-          features: ["Everything in Core", "Lab report interpretation", "Biomarker dashboard", "Clinician connect", "Doctor PDF report"],
-          featured: false,
-        },
-      ].map((plan) => (
-        <div key={plan.name} className="fade-up-2" style={{
-          backgroundColor: "#FDF0EC",
-          border: plan.featured ? "1.5px solid #0D0D0D" : "0.5px solid #E8E4F0",
-          borderRadius: "16px", padding: "20px", marginBottom: "12px",
-          position: "relative",
-        }}>
-          {plan.featured && (
-            <div style={{
-              position: "absolute", top: "-10px", left: "20px",
-              backgroundColor: "#0D0D0D", color: "#FAF7F2",
-              fontSize: "10px", fontWeight: "500",
-              padding: "3px 10px", borderRadius: "100px",
-              letterSpacing: "0.06em",
-            }}>
-              MOST POPULAR
-            </div>
-          )}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-            <div>
-              <div style={{ fontSize: "16px", fontWeight: "500", color: "#0D0D0D", fontFamily: "DM Sans, sans-serif" }}>{plan.name}</div>
-              <div style={{ fontSize: "11px", color: "#6B6560" }}>{plan.period}</div>
-            </div>
-            <div style={{ fontSize: "22px", fontFamily: "Cormorant Garamond, serif", color: "#0D0D0D" }}>{plan.price}</div>
-          </div>
-          {plan.features.map(f => (
-            <div key={f} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-              <span style={{ color: "#D4E4D8", fontSize: "12px" }}>✓</span>
-              <span style={{ fontSize: "13px", color: "#6B6560" }}>{f}</span>
-            </div>
-          ))}
-        </div>
-      ))}
-
-      <div className="fade-up-3" style={{ marginTop: "20px" }}>
-        <button onClick={() => onComplete(form)} style={continueBtn}>
-          Start 7-day free trial →
-        </button>
-        <button onClick={() => onComplete(form)} style={skipBtn}>
-          Maybe later
-        </button>
+        <button onClick={() => onComplete(form)} style={continueBtn}>Let's go →</button>
+        <button onClick={() => onComplete(form)} style={skipBtn}>Skip</button>
       </div>
     </div>
   )
