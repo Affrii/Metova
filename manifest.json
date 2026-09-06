@@ -1,13 +1,19 @@
 {
-   "id": "/",
+  "id": "/",
   "name": "Metova",
   "short_name": "Metova",
   "description": "AI-powered PCOS companion for Indian women",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#FAF7F2",
   "theme_color": "#0D0D0D",
   "orientation": "portrait",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["health", "lifestyle", "medical"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
@@ -27,26 +33,29 @@
       "src": "/screenshot1.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Metova Dashboard"
     },
     {
       "src": "/screenshot2.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "AI Health Companion"
     },
     {
       "src": "/screenshot3.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Phase-based Skin Guide"
     },
     {
       "src": "/screenshot4.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Cycle Tracker"
     }
   ]
-
 }
