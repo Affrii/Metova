@@ -48,14 +48,14 @@
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Phase-based Skin Guide"
+      "label": "Cycle Tracker"
     },
     {
       "src": "/screenshot4.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Cycle Tracker"
+      "label": "Phase-based Skin Guide"
     }
   ]
 }
